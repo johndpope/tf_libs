@@ -8,8 +8,8 @@ import pylab
 import os
 import shutil
 
-from . import tf_debug
-from .tf_debug import debug_print as dprint
+import tf_debug
+from tf_debug import debug_print as dprint
 import pprint as pp
 
 # print dir(tf_debug)
@@ -18,7 +18,7 @@ debug = 0
 
 def key_search(dict, *args, **kwargs):
     ## Return array of deepest nested VALUES that match key criteria
-    print('key_search function is incomplete!')
+    print 'key_search function is incomplete!'
     # subdict = dict
     # for key, value in dict.iteritems():
     #     for arg in args:
@@ -36,13 +36,13 @@ def key_contains( dict, *args ):
         return dict
     else:
         subdict = {}
-        for key, value in dict.items():     ## Loop through keys in main dictionary
+        for key, value in dict.iteritems():     ## Loop through keys in main dictionary
             dprint(debug, '')
             dprint(debug, 'Checking whether "{}"" should be kept'.format(key))
             # dprint( debug, key=key)#, value=value )
             nested_dict = dict
         
-            for i, (key_nest, value_nest) in enumerate(nested_dict.items()):    ## Loop through nested dictionary to compare with current argument
+            for i, (key_nest, value_nest) in enumerate(nested_dict.iteritems()):    ## Loop through nested dictionary to compare with current argument
                 # dprint(debug, 'Searching for keys containing "{}" in: {}'.format(arg, nested_dict.keys()))
                 dprint(debug, 'Does "{}" contain "{}"? '.format( key_nest, arg) )
                 # dprint( debug, key_nest=key_nest)#, value_nest=value_nest )
@@ -103,7 +103,7 @@ def key_contains( dict, *args ):
 def key_contains_all1( dict, string ):
     ## Return subset of dictionary containing keys that contain string
     subdict = {}
-    for key, value in dict.items():
+    for key, value in dict.iteritems():
         if string in key:
             subdict[key] = value
     return subdict
@@ -111,7 +111,7 @@ def key_contains_all1( dict, string ):
 def key_contains_sub1( dict, string ):
     ## Return subset of dictionary containing keys that contain string
     subdict = {}
-    for key, value in dict.items():
+    for key, value in dict.iteritems():
         if string in key:
             subdict = value
     return subdict
@@ -140,13 +140,13 @@ def main():
     # print
     # print key_contains(dict, 'on')
     # print
-    print('OUTPUT: ', key_contains_subn(dict, 'chi' ))
-    print()
-    print('OUTPUT: ', key_contains_subn(dict, 'on', '12'))
-    print()
-    print('OUTPUT: ', key_contains_subn(dict, 'tw', '88'))
-    print()
-    print('OUTPUT: ', key_contains_subn(dict, 'tw', '78'))
+    print 'OUTPUT: ', key_contains_subn(dict, 'chi' )
+    print
+    print 'OUTPUT: ', key_contains_subn(dict, 'on', '12')
+    print
+    print 'OUTPUT: ', key_contains_subn(dict, 'tw', '88')
+    print
+    print 'OUTPUT: ', key_contains_subn(dict, 'tw', '78')
     pass
 	
 

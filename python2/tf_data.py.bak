@@ -70,14 +70,14 @@ def argrelmax_global(array):
     imax = argrelmax(array, order = order)[0]
     if len(imax)==0:
         # print "WARNING: argrelmax_gloabal failed to find a global maximum - trying orders < {}".format(order)
-        print("WARNING: argrelmax_gloabal failed to find a global maximum - using max/where".format(order))
+        print "WARNING: argrelmax_gloabal failed to find a global maximum - using max/where".format(order)
         ## I think this happens when two or more max points have the same value - common in low res data 
     else:
         return imax
     
     maximum = np.amax(array)
     imax = np.nonzero(array==maximum)[0]
-    print('imax = {}, from max/where method, max = {}'.format(imax[0], maximum))
+    print 'imax = {}, from max/where method, max = {}'.format(imax[0], maximum)
 
     # while len(imax) == 0:
     #     try:
@@ -220,7 +220,7 @@ def data_split(x, y, gap_length=3, data_length=10, test=True):
     ## Get indices of begining of gaps sufficiently greater than the average
     igap = np.nonzero(diff>gap_length*av_gap)[0] # nonzero nested in tuple
     
-    if test: print('data_split: {} gap(s) identified: {}'.format(len(igap), igap))
+    if test: print 'data_split: {} gap(s) identified: {}'.format(len(igap), igap)
 
     xsplit = []
     ysplit = []
@@ -236,7 +236,7 @@ def data_split(x, y, gap_length=3, data_length=10, test=True):
             xsplit.append(x[isplit])
             ysplit.append(y[isplit])
         else: 
-            if test: print('data_split: First set exluded as too short')
+            if test: print 'data_split: First set exluded as too short'
 
         ## Deal with linear data that isn't bordered by the ends of the set
         for i in np.arange(1,len(igap)): # if start=stop, loop over empty array -> do nothing when len(ifap)=1
@@ -246,7 +246,7 @@ def data_split(x, y, gap_length=3, data_length=10, test=True):
                 xsplit.append(x[isplit])
                 ysplit.append(y[isplit])
             else: 
-                if test: print('data_split: Set {} exluded as too short'.format(i))
+                if test: print 'data_split: Set {} exluded as too short'.format(i)
 
         ## Last set of linear data after last gap
         if (len(x)-1)-igap[-1]+1 >= data_length: # Only add data if set is long enough
@@ -254,7 +254,7 @@ def data_split(x, y, gap_length=3, data_length=10, test=True):
             xsplit.append(x[isplit])
             ysplit.append(y[isplit])        
         else: 
-            if test: print('data_split: Last set exluded as too short')
+            if test: print 'data_split: Last set exluded as too short'
 
     return xsplit, ysplit
 
@@ -293,10 +293,10 @@ def smooth(x, window_len=11, window='hanning'):
     """
 
     if x.ndim != 1:
-        raise ValueError("smooth only accepts 1 dimension arrays.")
+        raise ValueError, "smooth only accepts 1 dimension arrays."
 
     if x.size < window_len:
-        raise ValueError("Input vector needs to be bigger than window size.")
+        raise ValueError, "Input vector needs to be bigger than window size."
 
 
     if window_len<3:
@@ -304,7 +304,7 @@ def smooth(x, window_len=11, window='hanning'):
 
 
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
+        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
 
     ## Add reflected values to ends
     s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
@@ -347,12 +347,12 @@ def function(required_arg, *args, **kwargs):
     ## args will be a list of positional arguments
     ## because it has * before it
     if args: # If there is anything in args
-        print(args)
+        print args
 
     ## kwargs will be a dictionary of keyword arguments,
     ## because it has ** before it
     if kwargs: # If there is anything in kwargs
-        print(kwargs)
+        print kwargs
 
     x = linspace(0,10,100)
     y = linspace(0,10,100)
@@ -376,13 +376,13 @@ def function(required_arg, *args, **kwargs):
     
 
 if __name__ == "__main__":
-    print('*** tf_data.py demo ***')
+    print '*** tf_data.py demo ***'
     x = linspace(0,10,1000)
     y = np.sin(x)+x
     y = y/np.amax(np.absolute(y)) 
     x = x / np.pi
-    print("interp_val(x, y, 2.3649, kind='linear') = ", end=' ')
-    print(interp_val(x, y, 2.3649, kind='linear'))
+    print "interp_val(x, y, 2.3649, kind='linear') = ",
+    print interp_val(x, y, 2.3649, kind='linear')
 
     fig = plt.figure('conv_diff test')
     fig.clear()

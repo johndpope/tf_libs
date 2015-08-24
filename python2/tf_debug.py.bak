@@ -41,7 +41,7 @@ class debug:
         if not plot: # Normal debug print opperation
             if debug.debug_ON:
                 if debug.lines_ON:
-                    print(module_name(level=1)+', '+line_no(level=1)+': ', end=' ')
+                    print module_name(level=1)+', '+line_no(level=1)+': ',
                 debug_print(1, *args, **kwargs)
                 debug.ndebug_ON += 1
                 debug.lines[self.line] = True
@@ -54,23 +54,23 @@ class debug:
 
     def debug_ON(self):
         debug.debug_ON = True
-        print('Debugging (tf_libs): \tdebug_ON')  
+        print 'Debugging (tf_libs): \tdebug_ON'  
 
     def off(self):
         debug.debug_ON = False
-        print('Debugging (tf_libs): \tOFF')
+        print 'Debugging (tf_libs): \tOFF'
 
     def l(self):
         line = inspect.currentframe().f_back.f_back.f_lineno
-        print('(line: {}) {}'.format(line, text))
+        print '(line: {}) {}'.format(line, text)
 
     def count(self):
-        print("line {}: {} <debug> debug_ON, {} debug OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
+        print "line {}: {} <debug> debug_ON, {} debug OFF".format(self.line, debug.ndebug_ON, debug.nOFF)
 
     def info(self):
-        print("line {}: {} <debug> debug_ON, {} <debug>: OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
-        for line, debug_ON in self.lines.items():
-            print(' ', line, debug_ON, ((debug_ON and ' <--') or ''))
+        print "line {}: {} <debug> debug_ON, {} <debug>: OFF".format(self.line, debug.ndebug_ON, debug.nOFF)
+        for line, debug_ON in self.lines.iteritems():
+            print ' ', line, debug_ON, ((debug_ON and ' <--') or '')
         
 def get_verbose_prefix():
     """Returns an informative prefix for verbose debug output messages"""
@@ -90,11 +90,11 @@ def module_name(level=0):
     try:
         name = os.path.basename(inspect.stack()[level+1][1])
     except IndexError:
-        print('tf_debug: Failed to return module name. See stack:')
+        print 'tf_debug: Failed to return module name. See stack:'
         try:
-            print(inspect.stack())
+            print inspect.stack()
         except:
-            print("inspect module doesn't seem to be working at all!")
+            print "inspect module doesn't seem to be working at all!"
         name = '*UNKNOWN*'
     return name
 
@@ -104,11 +104,11 @@ def line_no(level=0):
     try:
         line = str(inspect.stack()[level+1][2])
     except IndexError:
-        print('tf_debug: Failed to return line number. See stack:')
+        print 'tf_debug: Failed to return line number. See stack:'
         try:
-            print(inspect.stack())
+            print inspect.stack()
         except:
-            print("inspect module doesn't seem to be working at all!")
+            print "inspect module doesn't seem to be working at all!"
         line = '*UNKNOWN*'
     return line
 
@@ -143,17 +143,17 @@ def debug_print( debug, *args, **kwargs ):
     if debug:
         if args: # If there is anything in args
             for i, arg in enumerate(args):
-                if i != len(args)-1:    print(' '+str(arg)+',\t', end=' ')
-                else:                   print(arg)     
+                if i != len(args)-1:    print ' '+str(arg)+',\t',
+                else:                   print arg     
         if kwargs: # If there is anything in args
-            for key, value in kwargs.items():
+            for key, value in kwargs.iteritems():
                 ## If the variable is a list that wdebug_ON't fit debug_ON debug_ONe line
                 ##  start it debug_ON a new line
                 ## NOTE: does not check for numpy arrays
                 if (type(value) is list) and (len(value) > 6):
-                    print('{} \t=\n{}'.format( key, value ))
+                    print '{} \t=\n{}'.format( key, value )
                 else:
-                    print('{} \t= {}'.format( key, value ))
+                    print '{} \t= {}'.format( key, value )
 
 def debug_plot(*args, **kwargs):
     "Quickly plot the supplied variables"
@@ -170,7 +170,7 @@ def debug_plot(*args, **kwargs):
         x = args[0]
         y = args[1]
     else:
-        print('WARNING: Incorrect arguements to debug_plot')
+        print 'WARNING: Incorrect arguements to debug_plot'
         return
 
     fig = plt.figure()
@@ -188,27 +188,27 @@ def plineno(text=False):
     """Return the current line number in the calling program."""
     line = inspect.currentframe().f_back.f_back.f_lineno
     if text:
-        print('(line: {}) {}'.format(line, text))
+        print '(line: {}) {}'.format(line, text)
     return line
 
 def debug_demo():
-    print('*** tf_debug.py demo ***')
+    print '*** tf_debug.py demo ***'
     db = debug(1,1,1)
 
     x = np.linspace(0,10,100)
     y = np.linspace(10,30,100)
     a = [1,2,3]
-    print()
-    print('Line number (~181):', line_no(level=0))
-    print('Function name (debug_demo):', func_name(level=0))
-    print('Module name (tf_debug.py):', module_name(level=0))
-    print(file_loc_prefix(), '<Message>')
-    print()
-    print('debug_print tests:')
+    print
+    print 'Line number (~181):', line_no(level=0)
+    print 'Function name (debug_demo):', func_name(level=0)
+    print 'Module name (tf_debug.py):', module_name(level=0)
+    print file_loc_prefix(), '<Message>'
+    print
+    print 'debug_print tests:'
     a = 4
     arr = [4,7,3]
     str = 'hello!'
-    print(a, arr, str)
+    print a, arr, str
     debug_print( 1, a, arr, str )
     debug_print( 1, a=a, arr=arr, str=str )
 

@@ -48,7 +48,7 @@ def sub_arr(array, lim, con_array = None, min=None, max=None, boundaries=True):
         con_array = array
     else: 
         if np.size(con_array) != np.size(array):
-            print('WARNING: size(con_array) != size(array)')
+            print 'WARNING: size(con_array) != size(array)'
     if boundaries == True:
         sub = np.extract( (con_array>=lim[0]) * (con_array<=lim[1]), array)
     else:
@@ -64,7 +64,7 @@ def arr_range(array, var_name=False):
     """ Return numeric range of array as two element array """
     range = np.array([min(array), max(array)])
     if var_name:
-        print(var_name, 'range:', range)
+        print var_name, 'range:', range
     return range
 
 def arr_nearest(array, value, output = 'value', side = 'both', next=0):
@@ -79,15 +79,15 @@ def arr_nearest(array, value, output = 'value', side = 'both', next=0):
         idx = (array - value)
         idx = np.abs(np.extract(idx<0, idx)).argmin()
     else:
-        print('arr_nearest: Invalid side anguement')
+        print 'arr_nearest: Invalid side anguement'
 
     if (output == 'value') or (output == 'v'):
         return array.flat[idx]
     elif (output == 'index') or (output == 'i'):
         return idx
     else:
-        print('arr_nearest: Invalid output arguement:', output)
-        print("\t Accepted arguments: 'value', 'v', 'index', 'i'")
+        print 'arr_nearest: Invalid output arguement:', output
+        print "\t Accepted arguments: 'value', 'v', 'index', 'i'"
 
 def closest_max(x, y, x0, order = 3, output = 'value'):
     """ x value/index of max y value closest to x0 
@@ -103,8 +103,8 @@ def closest_max(x, y, x0, order = 3, output = 'value'):
     elif (output == 'index') or (output == 'i'):
         return iclose
     else:
-        print('arr_nearest: Invalid output arguement:', output)
-        print("\t Accepted arguments: 'value', 'v', 'index', 'i'")
+        print 'arr_nearest: Invalid output arguement:', output
+        print "\t Accepted arguments: 'value', 'v', 'index', 'i'"
 
 def is_scalar(var):
     """ True if variable is scalar """
@@ -138,12 +138,12 @@ def function(required_arg, *args, **kwargs):
     ## args will be a list of positional arguments
     ## because it has * before it
     if args: # If there is anything in args
-        print(args)
+        print args
 
     ## kwargs will be a dictionary of keyword arguments,
     ## because it has ** before it
     if kwargs: # If there is anything in kwargs
-        print(kwargs)
+        print kwargs
 
     x = linspace(0,10,100)
     y = linspace(0,10,100)
@@ -167,21 +167,21 @@ def function(required_arg, *args, **kwargs):
 
 
 if __name__ == "__main__":
-    print('*** tf_array.py demo ***')
-    print()
+    print '*** tf_array.py demo ***'
+    print
     x = linspace(0,10,101)
     y = linspace(10,30,101)
     
-    print("arr_range(x, var_name=False) = ", end=' ')
-    print(arr_range(x, var_name=False))
-    print()
+    print "arr_range(x, var_name=False) = ",
+    print arr_range(x, var_name=False)
+    print
 
     lim = [2,3.4]
-    print("sub_arr(x, lim, con_array = None, min=None, max=None, boundaries=True) = ", end=' ')
-    print(sub_arr(x, lim, con_array = None, min=None, max=None, boundaries=True))
-    print()
+    print "sub_arr(x, lim, con_array = None, min=None, max=None, boundaries=True) = ",
+    print sub_arr(x, lim, con_array = None, min=None, max=None, boundaries=True)
+    print
 
-    print("arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0) = ", end=' ')
-    print(arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0))
+    print "arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0) = ",
+    print arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0)
     pass
 
