@@ -1,0 +1,115 @@
+#!/bin/env python
+
+#==============================================================================
+# Purpose: Common data analysis functions
+#
+# Description:
+#  
+# Notes:
+#  
+# Reminders:
+#
+# Author:   Tom Farley
+# Created:  00-00-14
+# Modified: 00-00-14  
+#==============================================================================
+
+import numpy as np                  # Maths library
+# import matplotlib.pyplot as plt     # Plotting library
+
+# from scipy.optimize import curve_fit                # Curve fitting
+# from scipy.signal import find_peaks_cwt, argrelmax  # Peak finding
+from scipy.interpolate import interp1d              # Interpolation
+
+from pprint import pprint   # Pretty printing
+
+from tf_libs.tf_debug import debug_print as dprint
+
+debug = 0
+plot = 1
+
+def interp_val(x, y, x0, kind='linear'):
+    "Interpolated y value at x0 (scipy.interpolate.interp1d wrapper)"
+    ## TODO: add numpy array check
+    x = np.array(x)
+    y = np.array(y)
+    isort = np.argsort(x) # interp x values must be monotonically increasing
+    finterp = interp1d(x[isort], y[isort], kind=kind) # cubic noisy
+    y0 = finterp(x0)#[0] #???
+    return y0
+
+def central_diff(y, x):
+    """ Calculate central difference derivate """
+    ## Cannot calc central derivative of first element
+    diffs = np.array([float('NaN')])
+    for i in 1+np.arange(len(x)-2):
+        if x[i+1] == x[i-1]: # dx=0
+            dydx = float('Inf')
+        else:
+            dydx = (y[i+1] - y[i-1]) / (x[i+1]-x[i-1])
+        diffs = np.append(diffs, dydx)
+    ## Cannot calc central derivative of last element    
+    diffs = np.append(diffs, float('NaN'))
+    return diffs    
+
+def flinear(x, m, c):
+    """ Linear function: m*x + c """
+    return m*x + c
+
+def fquadratic(x, a, b, c):
+    return a*x**2 + b*x + c
+
+def fsqrt(x, a, b):
+    return a*x**0.5 + b
+
+def function(required_arg, *args, **kwargs):
+    """ 
+    Inputs:
+     *args          var     purpose
+     **kwargs       dict    purpose     
+    Outputs:
+     
+    Call example: 
+     
+    """
+
+    dprint(debug, required_arg)
+
+    ## args will be a list of positional arguments
+    ## because it has * before it
+    if args: # If there is anything in args
+        print args
+
+    ## kwargs will be a dictionary of keyword arguments,
+    ## because it has ** before it
+    if kwargs: # If there is anything in kwargs
+        print kwargs
+
+    x = linspace(0,10,100)
+    y = linspace(0,10,100)
+    
+    ## Plot results
+    plt.plot( x[:], y[:], '-o', label ='')
+    
+    ## Format plot
+    plt.grid(True)
+    plt.title(r"$\Delta")
+    plt.xlabel("")
+    plt.ylabel("")
+    plt.legend(loc='best')
+    ## Display transparrent legend, with round corners
+    legend = plt.legend(loc='upper right', fancybox=True)
+    legend.get_frame().set_alpha(0.5)
+    
+    if plot: plt.show() # Display plot if: plot=True
+
+    return
+    
+
+if __name__ == "__main__":
+    print '*** tf_data.py demo ***'
+    x = linspace(0,10,100)
+    y = linspace(10,30,100)
+    print "interp_val(x, y, 2.3649, kind='linear') = ",
+    print interp_val(x, y, 2.3649, kind='linear')
+    pass
