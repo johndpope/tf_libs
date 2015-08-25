@@ -185,8 +185,10 @@ def debug_plot(*args, **kwargs):
 
 
 def plineno(text=False):
-    """Return the current line number in the calling program."""
-    line = inspect.currentframe().f_back.f_back.f_lineno
+    """Return the current line number in the calling program.
+    TODO: Fix problem with inspect.currentframe().f_back.f_back returning None
+    """
+    # line = inspect.currentframe().f_back.f_back.f_lineno
     if text:
         print('(line: {}) {}'.format(line, text))
     return line

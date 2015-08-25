@@ -8,8 +8,8 @@ import pylab
 import os
 import shutil
 
-from . import tf_debug
-from .tf_debug import debug_print as dprint
+from tf_libs import tf_debug
+from tf_libs.tf_debug import debug_print as dprint
 import pprint as pp
 
 # print dir(tf_debug)

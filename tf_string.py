@@ -15,6 +15,7 @@
 #==============================================================================
 
 from itertools import repeat
+import numpy as np
 
 def str_err(value, error, nsf = 1, latex=False, separate=False):
 	""" Given a value and error, finds the position of the first sifnificant 
@@ -125,9 +126,9 @@ def str_popt(popt, pcov, check=[0,1,2], strings=None,
 	nl = list(repeat('\n', len(check)-1)) + ['']
 	string = ''
 	for i in check:
-		dprint(1, i=i)
+		print("i=",i)
 		#print strings, popt, units, nl
-		string += (strings[i] + '\t = ' + str_err(popt[i], sqrt(pcov[i][i]), latex=latex) + ' ' + 
+		string += (strings[i] + '\t = ' + str_err(popt[i], np.sqrt(pcov[i][i]), latex=latex) + ' ' +
 			units[i] + nl[i])
 	return string
 

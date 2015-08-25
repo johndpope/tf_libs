@@ -43,6 +43,8 @@ def sub_arr(array, lim, con_array = None, min=None, max=None, boundaries=True):
      array of values in array with indices satisfying min < con_array < max
     Call example: 
      function()
+
+     TODO: Update to convert normal lists to numpy arrays
     """
     if con_array == None:
         con_array = array

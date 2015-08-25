@@ -41,7 +41,9 @@ def mkdir(dirs, verbatim = False):
 				print('Directory "'+dir+'" already exists')
 
 def fn_filter(dir, pattern, unique=False):
-    """ Filenames in a given directory that match the search pattern """
+    """ Filenames in a given directory that match the search pattern
+    TODO: add compatibility for non raw string file paths
+    """
     fns = os.listdir(dir)
     p = re.compile(pattern)
     matches = []
