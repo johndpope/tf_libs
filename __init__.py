@@ -1,3 +1,4 @@
+from . import tf_array as arr
 from . import tf_debug as debug
 from . import tf_numeric as num
 from . import tf_file as file
@@ -19,4 +20,5 @@ from .tf_plot import *
 from .tf_string import *
 
 
-from ext.savitzky_golay import * ## Not written by TF: Scipy cookbook
+# from .ext import savitzky_golay  ## Not written by TF: Scipy cookbook
+from .ext.savitzky_golay import * ## Not written by TF: Scipy cookbook
