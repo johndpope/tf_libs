@@ -14,7 +14,6 @@ import pprint as pp
 
 # print dir(tf_debug)
 
-debug = 0
 
 
 

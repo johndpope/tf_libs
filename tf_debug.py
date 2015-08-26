@@ -1,6 +1,8 @@
 #!/bin/env pythdebug_ON
 
-# Purpose: 
+''' Purpose: Object used to assist debugging, giving information about line numbers and file locations etc
+
+'''
 
 import numpy as np
 import matplotlib.pyplot as plt     # Plotting library
@@ -201,10 +203,11 @@ def debug_demo():
     y = np.linspace(10,30,100)
     a = [1,2,3]
     print()
-    print('Line number (~181):', line_no(level=0))
+    print('Line number (~206):', line_no(level=0))
     print('Function name (debug_demo):', func_name(level=0))
     print('Module name (tf_debug.py):', module_name(level=0))
-    print(file_loc_prefix(), '<Message>')
+    print(get_verbose_prefix(), '<Message>')
+    print(whereami())
     print()
     print('debug_print tests:')
     a = 4

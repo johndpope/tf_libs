@@ -8,13 +8,14 @@ import pylab
 import os
 import shutil
 
-from tf_libs import tf_debug
-from tf_libs.tf_debug import debug_print as dprint
+
+import tf_debug
 import pprint as pp
 
 # print dir(tf_debug)
 
-debug = 0
+db = tf_debug.debug(1,1,1)
+# debug = 0
 
 def key_search(dict, *args, **kwargs):
     ## Return array of deepest nested VALUES that match key criteria
@@ -122,7 +123,8 @@ def key_contains_subn( dict, *args ):
 
     subdict = dict
     for i, arg in enumerate(args):
-        dprint(debug, '\n', arg = arg, subdict = subdict)
+        # dprint(debug, '\n', arg = arg, subdict = subdict)
+        db('\n', arg = arg, subdict = subdict)
         if i!=len(args)-1 :
             subdict = key_contains_sub1( subdict, arg )
         else:

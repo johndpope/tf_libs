@@ -27,10 +27,10 @@ import re           # Regular expressions
 
 from pprint import pprint   # Pretty printing
 
-from tf_libs.tf_debug import debug_print as dprint
+from tf_debug import debug_print as dprint
 
-debug = 0
-plot = 1
+# debug = 0
+# plot = 1
 
 def sub_arr(array, lim, con_array = None, min=None, max=None, boundaries=True):
     """Purpose: Extract sub array of values between min and max limits
@@ -171,8 +171,8 @@ def function(required_arg, *args, **kwargs):
 if __name__ == "__main__":
     print('*** tf_array.py demo ***')
     print()
-    x = linspace(0,10,101)
-    y = linspace(10,30,101)
+    x = np.linspace(0,10,101)
+    y = np.linspace(10,30,101)
     
     print("arr_range(x, var_name=False) = ", end=' ')
     print(arr_range(x, var_name=False))

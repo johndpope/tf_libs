@@ -31,8 +31,8 @@ from tf_libs.tf_debug import debug_print as dprint
 from tf_libs.tf_debug import debug as tfdebug
 db = tfdebug(1,1)
 
-debug = 0
-plot = 1
+# debug = 0
+# plot = 1
 
 def interp_val(x, y, x0, kind='linear'):
     "Interpolated y value at x0 (scipy.interpolate.interp1d wrapper)"
