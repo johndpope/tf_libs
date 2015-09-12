@@ -15,11 +15,12 @@
 #==============================================================================
 
 import numpy as np
+import scipy as sp
 import matplotlib.pyplot as plt
 import matplotlib                   # For transforms etc ?
 from matplotlib import transforms   # For transforms etc
 
-import tf_libs.tf_numeric as tf_num
+import tf_numeric as tf_num
 
 
 def vline_label(x, label, ypos=0.8, xoffset=0.01, color = 'k'):
@@ -84,6 +85,41 @@ def axis_range( x, pad1=5, pad2=10 ):
 	range = tf_num.range_of(x)
 	return [ min(x)-pad1*range, max(x)+pad2*range]
 	
+def arr_hist(arr, nbins=50):
+
+	# the histogram of the data with histtype='step'
+	n, bins, patches = plt.hist(arr, nbins, normed=1, histtype='stepfilled')
+	plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
+
+	mean = np.mean(arr)
+	# mode = sp.stats.mode(arr)
+	min = np.min(arr)
+	max = np.max(arr)
+	range = max-min
+	stdev = np.std(arr)
+	stats_str = 'Mean: {:0.1f}\nMode: \nMin: {:0.1f}\nMax: {:0.1f}\nRange: {:0.1f}\nStd dev: {:0.1f}'.format(mean, min, max, range, stdev)
+	plt.annotate(stats_str, xy=(0.04, 0.75), xycoords='axes fraction')
+
+	plt.show()
+
+	# add a line showing the expected distribution
+	# y = sp.stats.normpdf( bins, mu, sigma)
+	# l = plt.plot(bins, y, 'k--', linewidth=1.5)
+	return
+
 
 if __name__ == "__main__":
-    pass
+	print("axis_range([0,1,2,3,10])")
+	print(axis_range([0,1,2,3,10]))
+
+	mu, sigma = 200, 25
+	x = mu + sigma*np.random.randn(10000)
+	# x = np.linspace(0,100)
+	arr_hist((x, x*0.75))
+
+
+
+
+
+
+

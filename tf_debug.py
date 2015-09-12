@@ -14,23 +14,24 @@ import sys
 
 class debug:
     """ Debugging features """
-    debug_ON = True # List of all files read so far (in order)
-    plot_ON = True
+    debug_ON = False
+    plot_ON = False
     lines_ON = False
     init = False
     ndebug_ON = 0
     nOFF = 0
     lines = {}
     functidebug_ONs = {'debug_ON':[], 'off': []}
+    # List of all files read so far (in order)
 
     def __init__(self, debug_ON=False, lines_ON = False, plot_ON=True):
         self.line = inspect.currentframe().f_back.f_lineno
-        ## Code first time debug class is initiated
-        if not debug.init:
-            # print whereami(level=1)+'tf_libs <debug> instance created'#.format(self.line)
+        ## First time debug class is initiated print location if debug ON
+        if (not debug.init) and debug_ON:
+            print(whereami(level=1)+'tf_libs <debug> instance created')#.format(self.line)
             debug.init = True
         if debug_ON:
-            debug.debug_ON = True
+            self.debug_ON = True
         if lines_ON:
             debug.lines_ON = True
         if plot_ON:
@@ -41,6 +42,7 @@ class debug:
         self.line = inspect.currentframe().f_back.f_lineno
 
         if not plot: # Normal debug print opperation
+            debug_print(1, debug_ON=debug.debug_ON)
             if debug.debug_ON:
                 if debug.lines_ON:
                     print(module_name(level=1)+', '+line_no(level=1)+': ', end=' ')
@@ -70,7 +72,7 @@ class debug:
         print("line {}: {} <debug> debug_ON, {} debug OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
 
     def info(self):
-        print("line {}: {} <debug> debug_ON, {} <debug>: OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
+        print("line {}: {} <debug> ON, {} <debug>: OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
         for line, debug_ON in self.lines.items():
             print(' ', line, debug_ON, ((debug_ON and ' <--') or ''))
         

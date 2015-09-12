@@ -1,18 +1,22 @@
-#!/bin/env python
+#!/usr/bin/env python
 
-#==============================================================================
-# Purpose: Convenitent, frequently needed array opperations
-#
-# Description:
-#  
-# Notes:
-#  
-# Reminders:
-#
-# Author:   Tom Farley
-# Created:  17-06-14
-# Modified: 00-00-14  
-#==============================================================================
+""" tf_array.py: Frequently used array operations and wrappers.
+
+Keyword arguments:
+    newarg -- type, description (default 0.0)
+    newarg -- type, description (default 0.0)
+
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo: sub_arr(arr, between=[start, end]) using extract
+
+Info:
+    @since: 17-06-14
+"""
 
 import numpy as np                  # Maths library
 import matplotlib.pyplot as plt     # Plotting library

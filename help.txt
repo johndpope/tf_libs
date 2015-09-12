@@ -1,0 +1,5 @@
+Using tf_libs in pycharm projects:
+- Add 'import' folder containing tf_libs to project structure in settings 
+
+Using elements of tf_libs from other tf_libs files:
+- Use eg. "import tf_numeric as tf_num" not "import .tf_numeric as tf_num"
