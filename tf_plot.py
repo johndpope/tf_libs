@@ -88,8 +88,8 @@ def axis_range( x, pad1=5, pad2=10 ):
 def arr_hist(arr, nbins=50):
 
 	# the histogram of the data with histtype='step'
-	n, bins, patches = plt.hist(arr, nbins, normed=1, histtype='stepfilled')
-	plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
+	n, bins, patches = plt.hist(arr, nbins, normed=0, histtype='stepfilled', color=['g','b','c'][0:len(arr)])
+	# plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
 
 	mean = np.mean(arr)
 	# mode = sp.stats.mode(arr)
@@ -97,8 +97,8 @@ def arr_hist(arr, nbins=50):
 	max = np.max(arr)
 	range = max-min
 	stdev = np.std(arr)
-	stats_str = 'Mean: {:0.1f}\nMode: \nMin: {:0.1f}\nMax: {:0.1f}\nRange: {:0.1f}\nStd dev: {:0.1f}'.format(mean, min, max, range, stdev)
-	plt.annotate(stats_str, xy=(0.04, 0.75), xycoords='axes fraction')
+	stats_str = 'Array 1:\nMean: {:0.1f}\nMode: \nMin: {:0.1f}\nMax: {:0.1f}\nRange: {:0.1f}\nStd dev: {:0.1f}'.format(mean, min, max, range, stdev)
+	plt.annotate(stats_str, xy=(0.04, 0.7), xycoords='axes fraction')
 
 	plt.show()
 
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 	mu, sigma = 200, 25
 	x = mu + sigma*np.random.randn(10000)
 	# x = np.linspace(0,100)
-	arr_hist((x, x*0.75))
+	arr_hist((x,x*.5))
 
 
 
