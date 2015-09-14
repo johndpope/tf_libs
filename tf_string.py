@@ -15,7 +15,9 @@
 #==============================================================================
 
 from itertools import repeat
+import datetime
 import numpy as np
+import tf_array
 
 def str_err(value, error, nsf = 1, latex=False, separate=False):
 	""" Given a value and error, finds the position of the first sifnificant 
@@ -170,6 +172,18 @@ def comb_str(*args, **kwargs):
     for str1, str2 in zip(args, args[1:]): # create tuples of adjacent strings
         comb_str += scs(str1, str2=str2, append=True, separator=separator)            
     return comb_str
+
+
+
+def sort_dates(dates_in, format = "%Y-%m-%d", reverse = True):
+    """Sort dates chronologically
+    Note: This will add padded zeros if they are nor already present therefore output not always equal to input
+    basic method from: http://stackoverflow.com/questions/5166842/sort-dates-in-python-array """
+    dates = [datetime.datetime.strptime(d, format) for d in dates_in]
+    indices = tf_array.argsort(dates, reverse=reverse)
+    dates.sort(reverse = reverse)
+    sorted = [datetime.datetime.strftime(d, format) for d in dates]
+    return sorted, indices
 
 def test_print():
 	print("Here is a string")

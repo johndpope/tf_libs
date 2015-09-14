@@ -46,6 +46,7 @@ def test_tf_array():
     x = np.linspace(0,10,101)
     y = np.linspace(10,30,101)
     l = [list(range(10))]
+    l2 = [5,6,9,7,4,1,3,2,5,6]
 
     print("arr_range(x, var_name=False) = ", end=' ')
     print(arr_range(x, var_name=False))
@@ -60,6 +61,10 @@ def test_tf_array():
     print(arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0))
 
     print(check_array(l, verbatim=1))
+
+    print("argsort([5,6,9,7,4,1,3,2,5,6])")
+    print(argsort(l2))
+    print(list(l2[i] for i in argsort(l2)))
 
 
     return
@@ -104,11 +109,18 @@ def test_tf_plot():
 
     return
 
-from tf_array import *
+from tf_string import *
 def test_tf_string():
+
+    timestamps = ['2011-06-2', '2011-08-05', '2011-02-04', '2010-1-14', '2010-12-13', '2010-1-12', '2010-2-11', '2010-2-07', '2010-12-02', '2011-11-30', '2010-11-26', '2010-11-23', '2010-11-22', '2010-11-16']
+    tsort, tind = sort_dates(timestamps, format = "%Y-%m-%d", reverse = True)
+    print('sort_dates(timestamps, format = "%Y-%m-%d", reverse = True)')
+    print(tsort)
+    print(list(timestamps[i] for i in tind))
 
     return
 
 if __name__ == "__main__":
 
-    test_tf_array()
+    # test_tf_array()
+    test_tf_string()

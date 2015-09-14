@@ -33,6 +33,13 @@ from tf_debug import debug_print as dprint
 # debug = 0
 # plot = 1
 
+
+def argsort(seq, reverse=False):
+    """ Return indices of sorted (assernding) list """
+    # http://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
+    return sorted(range(len(seq)), key=seq.__getitem__, reverse=reverse)
+
+
 def check_array(arr, ndarray=True, nest_depth=0, verbatim = False):
     """Check that the supplied array is as expected"""
     if verbatim: print('In: ', type(arr), arr)
