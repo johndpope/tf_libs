@@ -76,14 +76,28 @@ def text_poss( x, y, string, ax, center = False ):
 	# y_data = tf_num.frac_range( ax_limits[2:4], y )
 	# plt.text( string, x_data, y_data )
 
-def axis_range( x, pad1=5, pad2=10 ):
-	""" Old function that takes data
+def axis_range( x, pad1=5, pad2=10 ,absolute=False, pass_zero = False):
+	""" Extend range of two element array
 	"""
-    ## Pad percentage values
-	pad1 /= 100.0 # Convert to percentage
-	pad2 /= 100.0
+	assert (len(x) == 2), 'Not two element array'
+	if ~absolute:
+		## Pad percentage values
+		pad1 /= 100.0 # Convert to percentage
+		pad2 /= 100.0
+
+	min = min(x)
+	max = max(x)
 	range = tf_num.range_of(x)
-	return [ min(x)-pad1*range, max(x)+pad2*range]
+
+	if pass_zero:
+		min = min(x)-pad1*range
+	else:
+		if (min(x)-pad1*range)*min < 0: 	# if extension of min changes sign of min stop at 0
+			min = 0
+
+	max = max(x)+pad2*range
+
+	return np.array[min, max]
 	
 def arr_hist(arr, nbins=50):
 

@@ -37,7 +37,7 @@ def range_of(list):
     Outputs:
         float:  numeric range of input list 
     """
-    return max(list) - min(list)
+    return np.abs(max(list) - min(list))
 
 def frac_range(list, frac):
     """ Return the numerical value at a given fraction of the way 

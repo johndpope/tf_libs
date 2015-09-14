@@ -197,6 +197,18 @@ def plineno(text=False):
         print('(line: {}) {}'.format(line, text))
     return line
 
+def demo_print(command, info=""):
+    """ Doesn't work if func not defined in this namespace
+    """
+    if info:
+        info = ' - '+info
+        print('\n'+command+info)
+        print(exec(command))
+    else:
+        print('\n'+command+' = ', end='')
+        print(exec(command))
+    return exec(command)
+
 def debug_demo():
     print('*** tf_debug.py demo ***')
     db = debug(1,1,1)

@@ -2,10 +2,6 @@
 
 """ tf_array.py: Frequently used array operations and wrappers.
 
-Keyword arguments:
-    newarg -- type, description (default 0.0)
-    newarg -- type, description (default 0.0)
-
 Detailed description:
 
 Notes:
@@ -25,9 +21,10 @@ from scipy.optimize import curve_fit                # Curve fitting
 from scipy.signal import find_peaks_cwt, argrelmax  # Peak finding
 from scipy.interpolate import interp1d              # Interpolation
 
-import os           # System directory/file opperations
-import shutil       # High-level file operations
-import re           # Regular expressions
+import itertools    #
+# import os           # System directory/file opperations
+# import shutil       # High-level file operations
+# import re           # Regular expressions
 
 from pprint import pprint   # Pretty printing
 
@@ -36,11 +33,35 @@ from tf_debug import debug_print as dprint
 # debug = 0
 # plot = 1
 
+def check_array(arr, ndarray=True, nest_depth=0, verbatim = False):
+    """Check that the supplied array is as expected"""
+    if verbatim: print('In: ', type(arr), arr)
+
+    ## Remove nesting lists
+    if nest_depth==0:
+        while (type(arr) == list) and (len(arr)==1):
+            arr = arr[0]
+
+    assert (type(arr) == list or np.ndarray), arr
+    assert type(arr[0]) != list, arr
+
+    if ndarray: # Make sure arr is an ndarray
+        # if type(arr) == list:
+        #     arr = list(itertools.chain(*arr))
+        arr = np.array(arr)
+
+    if verbatim:
+        print('Out: ', type(arr), arr)
+
+    return arr
+
+
 def sub_arr(array, lim, con_array = None, min=None, max=None, boundaries=True):
     """Purpose: Extract sub array of values between min and max limits
     arguements:
      array          var     array to take subset of
      lim            var     array containing [min, max]
+     boundaries     bool    include boundaries ie <= and >=
     keywords:
      con_array      var     condition array to apply min/max check on
     Outputs:
@@ -48,13 +69,17 @@ def sub_arr(array, lim, con_array = None, min=None, max=None, boundaries=True):
     Call example: 
      function()
 
-     TODO: Update to convert normal lists to numpy arrays
+    TODO: implement only using max or min
     """
-    if con_array == None:
+    array = check_array(array) # check array is a numpy array
+
+    assert lim[1] >= lim[0], 'min > max'
+
+    if con_array == None: # If no separate array supplied use same array for min/max
         con_array = array
     else: 
-        if np.size(con_array) != np.size(array):
-            print('WARNING: size(con_array) != size(array)')
+        assert np.size(con_array) != np.size(array), 'WARNING: size(con_array) != size(array)'
+
     if boundaries == True:
         sub = np.extract( (con_array>=lim[0]) * (con_array<=lim[1]), array)
     else:
@@ -75,7 +100,8 @@ def arr_range(array, var_name=False):
 
 def arr_nearest(array, value, output = 'value', side = 'both', next=0):
     """Element in nd array closest to the scalar value
-    Use 'next' to return next nearest values"""
+    Use 'next' to return next nearest values
+    @Todo: add nest functionality """
     if side == 'both':
         idx = np.abs(array - value).argmin()
     elif side =='above':
@@ -85,14 +111,14 @@ def arr_nearest(array, value, output = 'value', side = 'both', next=0):
         idx = (array - value)
         idx = np.abs(np.extract(idx<0, idx)).argmin()
     else:
-        print('arr_nearest: Invalid side anguement')
+        print('arr_nearest: Invalid side argument')
 
     if (output == 'value') or (output == 'v'):
         return array.flat[idx]
     elif (output == 'index') or (output == 'i'):
         return idx
     else:
-        print('arr_nearest: Invalid output arguement:', output)
+        print('arr_nearest: Invalid output argument:', output)
         print("\t Accepted arguments: 'value', 'v', 'index', 'i'")
 
 def closest_max(x, y, x0, order = 3, output = 'value'):
@@ -128,66 +154,25 @@ def safe_len(var):
     else:
         return len(var)
 
-def function(required_arg, *args, **kwargs):
-    """ 
-    Inputs:
-     *args          var     purpose
-     **kwargs       dict    purpose     
-    Outputs:
-     
-    Call example: 
-     
-    """
-
-    dprint(debug, required_arg)
-
-    ## args will be a list of positional arguments
-    ## because it has * before it
-    if args: # If there is anything in args
-        print(args)
-
-    ## kwargs will be a dictionary of keyword arguments,
-    ## because it has ** before it
-    if kwargs: # If there is anything in kwargs
-        print(kwargs)
-
-    x = linspace(0,10,100)
-    y = linspace(0,10,100)
-    
-    ## Plot results
-    plt.plot( x[:], y[:], '-o', label ='')
-    
-    ## Format plot
-    plt.grid(True)
-    plt.title(r"$\Delta")
-    plt.xlabel("")
-    plt.ylabel("")
-    plt.legend(loc='best')
-    ## Display transparrent legend, with round corners
-    legend = plt.legend(loc='upper right', fancybox=True)
-    legend.get_frame().set_alpha(0.5)
-    
-    if plot: plt.show() # Display plot if: plot=True
-
-    return
-
 
 if __name__ == "__main__":
-    print('*** tf_array.py demo ***')
-    print()
-    x = np.linspace(0,10,101)
-    y = np.linspace(10,30,101)
-    
-    print("arr_range(x, var_name=False) = ", end=' ')
-    print(arr_range(x, var_name=False))
-    print()
+    from test.run_test import test_tf_array
+    test_tf_array()
 
-    lim = [2,3.4]
-    print("sub_arr(x, lim, con_array = None, min=None, max=None, boundaries=True) = ", end=' ')
-    print(sub_arr(x, lim, con_array = None, min=None, max=None, boundaries=True))
-    print()
 
-    print("arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0) = ", end=' ')
-    print(arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0))
-    pass
+    # x = np.linspace(0,10,101)
+    # y = np.linspace(10,30,101)
+    #
+    # print("arr_range(x, var_name=False) = ", end=' ')
+    # print(arr_range(x, var_name=False))
+    # print()
+    #
+    # lim = [2,3.4]
+    # print("sub_arr(x, lim, con_array = None, min=None, max=None, boundaries=True) = ", end=' ')
+    # print(sub_arr(x, lim, con_array = None, min=None, max=None, boundaries=True))
+    # print()
+    #
+    # print("arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0) = ", end=' ')
+    # print(arr_nearest(x, 2.65467, output = 'value', side = 'both', next=0))
+    # pass
 
