@@ -1,18 +1,26 @@
-#!/bin/env python
+#!/usr/bin/env python
 
-#==============================================================================
-# Purpose: Physical constants and conversion factors
-#
-# Description:
-#  
-# Notes:
-#  
-# Reminders:
-#
-# Author:   Tom Farley
-# Created:  20-08-14
-# Modified: 00-00-14  
-#==============================================================================
+""" tf_const.py: Physical constants
+
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo:
+
+Info:
+    @since: 18/09/2015
+"""
+
+__author__ = 'Tom Farley'
+__copyright__ = "Copyright 2015, TF Library Project"
+__credits__ = []
+__email__ = "farleytpm@gmail.com"
+__status__ = "Development"
+__version__ = "1.0.1"
+
 
 """ Physical constants: 
 ## Physical constants

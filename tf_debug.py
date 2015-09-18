@@ -1,8 +1,18 @@
-#!/bin/env pythdebug_ON
+#!/usr/bin/env python
 
-''' Purpose: Object used to assist debugging, giving information about line numbers and file locations etc
+""" tf_debug.py: Object used to assist debugging, giving information about line numbers and file locations etc
 
-'''
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo:
+
+Info:
+    @since: 18/09/2015
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt     # Plotting library
@@ -11,6 +21,14 @@ import os
 import shutil
 import inspect              # Line numbers etc
 import sys
+
+__author__ = 'Tom Farley'
+__copyright__ = "Copyright 2015, TF Library Project"
+__credits__ = []
+__email__ = "farleytpm@gmail.com"
+__status__ = "Development"
+__version__ = "1.0.1"
+
 
 class debug:
     """ Debugging features """

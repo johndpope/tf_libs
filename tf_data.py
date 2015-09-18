@@ -1,18 +1,18 @@
-#!/bin/env python
+#!/usr/bin/env python
 
-#==============================================================================
-# Purpose: Common data analysis functions
-#
-# Description:
-#  
-# Notes:
-#  
-# Reminders:
-#
-# Author:   Tom Farley
-# Created:  00-00-14
-# Modified: 00-00-14  
-#==============================================================================
+""" tmp.py: Frequently used data processing operations and wrappers.
+
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo:
+
+Info:
+    @since: 18/09/2015
+"""
 
 import numpy as np                  # Maths library
 import matplotlib.pyplot as plt     # Plotting library
@@ -30,6 +30,13 @@ from tf_libs.tf_debug import debug_print as dprint
 
 from tf_libs.tf_debug import debug as tfdebug
 db = tfdebug(1,1)
+
+__author__ = 'Tom Farley'
+__copyright__ = "Copyright 2015, TF Library Project"
+__credits__ = []
+__email__ = "farleytpm@gmail.com"
+__status__ = "Development"
+__version__ = "1.0.1"
 
 # debug = 0
 # plot = 1

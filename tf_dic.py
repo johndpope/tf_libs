@@ -1,6 +1,18 @@
-#!/bin/env python
+#!/usr/bin/env python
 
-# Purpose: 
+""" tf_dic.py: Frequently used dictionary tools.
+
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo:
+
+Info:
+    @since: 18/09/2015
+"""
 
 import numpy as np
 import matplotlib as mpl
@@ -8,9 +20,15 @@ import pylab
 import os
 import shutil
 
-
 import tf_debug
 import pprint as pp
+
+__author__ = 'Tom Farley'
+__copyright__ = "Copyright 2015, TF Library Project"
+__credits__ = []
+__email__ = "farleytpm@gmail.com"
+__status__ = "Development"
+__version__ = "1.0.1"
 
 # print dir(tf_debug)
 

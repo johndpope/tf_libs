@@ -1,18 +1,25 @@
-#!/bin/env python
+#!/usr/bin/env python
 
-#==============================================================================
-# Purpose: 
-#
-# Description:
-#  
-# Notes:
-#  
-# Reminders:
-#
-# Author:   Tom Farley
-# Created:  00-00-14
-# Modified: 00-00-14  
-#==============================================================================
+""" tf_numeric.py: Frequently used numeric functions.
+
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo:
+
+Info:
+    @since: 18/09/2015
+"""
+
+__author__ = 'Tom Farley'
+__copyright__ = "Copyright 2015, TF Library Project"
+__credits__ = []
+__email__ = "farleytpm@gmail.com"
+__status__ = "Development"
+__version__ = "1.0.1"
 
 def is_number(s):
     """

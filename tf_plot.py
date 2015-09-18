@@ -1,18 +1,18 @@
-#!/bin/env python
+#!/usr/bin/env python
 
-#==============================================================================
-# Purpose: 
-#
-# Description:
-#  
-# Notes: Make histogram of array elements function
-#
-# Reminders:
-#
-# Author:   Tom Farley
-# Created:  00-00-14
-# Modified: 00-00-14  
-#==============================================================================
+""" tf_plot.py: Frequently used plotting operations and wrappers.
+
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo:
+
+Info:
+    @since: 18/09/2015
+"""
 
 import numpy as np
 import scipy as sp
@@ -21,6 +21,13 @@ import matplotlib                   # For transforms etc ?
 from matplotlib import transforms   # For transforms etc
 
 import tf_numeric as tf_num
+
+__author__ = 'Tom Farley'
+__copyright__ = "Copyright 2015, TF Library Project"
+__credits__ = []
+__email__ = "farleytpm@gmail.com"
+__status__ = "Development"
+__version__ = "1.0.1"
 
 
 def vline_label(x, label, ypos=0.8, xoffset=0.01, color = 'k'):

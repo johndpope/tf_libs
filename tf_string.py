@@ -1,23 +1,69 @@
-#!/bin/env python
+#!/usr/bin/env python
 
-#==============================================================================
-# Purpose: 
-#
-# Description:
-#  
-# Notes:
-#  
-# Reminders:
-#
-# Author:   Tom Farley
-# Created:  00-00-14
-# Modified: 00-00-14  
-#==============================================================================
+""" tf_string.py: Frequently used string operations and wrappers.
+
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo:
+
+Info:
+    @since: 18/09/2015
+"""
 
 from itertools import repeat
 import datetime
 import numpy as np
 import tf_array
+
+__author__ = 'Tom Farley'
+__copyright__ = "Copyright 2015, TF Library Project"
+__credits__ = []
+__email__ = "farleytpm@gmail.com"
+__status__ = "Development"
+__version__ = "1.0.1"
+
+
+def _before_dp(x):
+    """ digits before decimal point """
+    x = np.abs(x)
+    n = int(np.floor(np.log10(x)))
+    if x >= 1:
+        return n+1
+    if x < 1:
+        return 0
+
+
+def strnsignif(x, nsignif=3, _verbatim=False):
+    """ Return string format of number to supplied no. of significant figures
+    Ideas from: http://stackoverflow.com/questions/3410976/how-to-round-a-number-to-significant-figures-in-python
+    Note: Does not round up for: strnsignif(-55.55,nsignif=3 ==> -55.5  -- Not sure why...?"""
+    assert nsignif >= 1, 'Negative number of significant figures supplied'
+
+    if _verbatim: print('_before_dp: ',_before_dp(x))
+
+    format_str = '%.'+str(nsignif)+'g'
+    strn = '%s' % float(format_str % x)
+    ## %s always formats with a decimal point ie .0
+
+    ## Remove -ve sign and add it at the end to simplify counting no of characters in string
+    if x<0: strn = strn[1:]
+
+    ## Add trailing 0s of precision if they are missing
+    if (len(strn)-1) < nsignif:
+        strn += '0'*(nsignif-(len(strn)-1))
+    ## Remove false trailing .0 giving false impression of precission
+    elif _before_dp(x) >= nsignif:
+            strn = strn.split(sep='.')[0]
+
+    ## Add -ve sign if removed
+    if x<0: strn = '-'+strn
+    return strn
+
+
 
 def str_err(value, error, nsf = 1, latex=False, separate=False):
 	""" Given a value and error, finds the position of the first sifnificant 
@@ -190,8 +236,8 @@ def test_print():
 
 if __name__ == "__main__":
     print('*** tf_string.py demo ***')
-    x = linspace(0,10,100)
-    y = linspace(10,30,100)
+    x = np.linspace(0,10,100)
+    y = np.linspace(10,30,100)
 
     a = [1,2,3]
     str_popt(a,a)

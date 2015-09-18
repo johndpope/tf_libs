@@ -118,6 +118,11 @@ def test_tf_string():
     print(tsort)
     print(list(timestamps[i] for i in tind))
 
+    x = -55.55 #4564.6548496
+    print ('x =',x)
+    print(strnsignif(x,nsignif=3, _verbatim=True))
+
+
     return
 
 if __name__ == "__main__":

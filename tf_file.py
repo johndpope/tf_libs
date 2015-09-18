@@ -1,18 +1,18 @@
-#!/bin/env python
+#!/usr/bin/env python
 
-#==============================================================================
-# Purpose: 
-#
-# Description:
-#  
-# Notes:
-#  
-# Reminders:
-#
-# Author:   Tom Farley
-# Created:  00-00-14
-# Modified: 00-00-14  
-#==============================================================================
+""" tf_file.py: Frequently used file operations and wrappers.
+
+Detailed description:
+
+Notes:
+    @bug:
+
+Todo:
+    @todo: find_latest_file function using sort_dates()
+
+Info:
+    @since: 17-06-14
+"""
 
 
 import numpy as np
@@ -22,6 +22,13 @@ import re
 # import shutil
 
 from . import tf_numeric
+
+__author__ = 'Tom Farley'
+__copyright__ = "Copyright 2015, TF Library Project"
+__credits__ = []
+__email__ = "farleytpm@gmail.com"
+__status__ = "Development"
+__version__ = "1.0.1"
 
 def mkdir(dirs, verbatim = False):
 	""" Checks if a directory exists and makes it if nessesary.
@@ -125,6 +132,11 @@ def ncol(fn_list, cols, dir='', filekey=False, np_arrays = False, header_len = 0
 		if debug: print('tf_file: returned data with filename nesting')
 		return fn_data
 
+
+def find_latest_file(file_names):
+	""" Return filename containing most recent date	"""
+
+	return
 
 def main():
 	fn = ['chi_im_tot']
