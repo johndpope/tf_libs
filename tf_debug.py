@@ -5,6 +5,7 @@
 Detailed description:
 
 Notes:
+    self.debug_ON is the value for the instance, debug.debug_ON
     @bug:
 
 Todo:
@@ -50,21 +51,26 @@ class debug:
             debug.init = True
         if debug_ON:
             self.debug_ON = True
+        else:
+            self.debug_ON = False
         if lines_ON:
             debug.lines_ON = True
         if plot_ON:
             debug.plot_ON = True
+
+        debug_print(1, init_debug_ON=self.debug_ON)
+
 
     def __call__(self, *args, **kwargs):
         plot = kwargs.pop('plot', False)
         self.line = inspect.currentframe().f_back.f_lineno
 
         if not plot: # Normal debug print opperation
-            debug_print(1, debug_ON=debug.debug_ON)
-            if debug.debug_ON:
+            # debug_print(1, debug_ON=self.debug_ON)
+            if self.debug_ON:
                 if debug.lines_ON:
                     print(module_name(level=1)+', '+line_no(level=1)+': ', end=' ')
-                debug_print(1, *args, **kwargs)
+                debug_print(self.debug_ON, *args, **kwargs)
                 debug.ndebug_ON += 1
                 debug.lines[self.line] = True
             else: 
@@ -74,7 +80,7 @@ class debug:
             if debug.plot_ON:
                 debug_plot(*args, **kwargs) 
 
-    def debug_ON(self):
+    def on(self):
         debug.debug_ON = True
         print('Debugging (tf_libs): \tdebug_ON')  
 

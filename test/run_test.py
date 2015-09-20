@@ -118,9 +118,18 @@ def test_tf_string():
     print(tsort)
     print(list(timestamps[i] for i in tind))
 
-    x = -55.55 #4564.6548496
+    x = 1451.260 #4564.6548496
+    err = 0.0000004894798
     print ('x =',x)
-    print(strnsignif(x,nsignif=3, _verbatim=True))
+
+    print("strnsignif(x,nsignif=4, _verbatim=True)")
+    print(strnsignif(err,nsignif=4, _verbatim=True))
+
+    print("to_precision(1.230,4)")
+    print(to_precision(1.230,4))
+
+    print("\nstr_err(%s, %s) = " % (x, err), end='')
+    print(str_err(x,err))
 
 
     return

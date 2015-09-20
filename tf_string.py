@@ -8,7 +8,8 @@ Notes:
     @bug:
 
 Todo:
-    @todo:
+    @todo: Use to_precision
+    @todo: Extend strnsignif to arrays of values
 
 Info:
     @since: 18/09/2015
@@ -17,7 +18,9 @@ Info:
 from itertools import repeat
 import datetime
 import numpy as np
+import math
 import tf_array
+from tf_debug import debug
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -26,46 +29,182 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
+db = debug(debug_ON=0, lines_ON = False, plot_ON=False)
 
-def _before_dp(x):
+def to_precision(x,p):
+    """ Return a string representation of x formatted with a precision of p
+
+    strnsignif also adds trailing 0s for correnct # of sf to functionality is same
+
+    From: http://randlet.com/blog/python-significant-figures-format/
+    Based on the webkit javascript implementation taken from here:
+    https://code.google.com/p/webkit-mirror/source/browse/JavaScriptCore/kjs/number_object.cpp
+    """
+
+    x = float(x)
+
+    if x == 0.:
+        return "0." + "0"*(p-1)
+
+    out = []
+
+    if x < 0:
+        out.append("-")
+        x = -x
+
+    e = int(math.log10(x))
+    tens = math.pow(10, e - p + 1)
+    n = math.floor(x/tens)
+
+    if n < math.pow(10, p - 1):
+        e = e -1
+        tens = math.pow(10, e - p+1)
+        n = math.floor(x / tens)
+
+    if abs((n + 1.) * tens - x) <= abs(n * tens -x):
+        n = n + 1
+
+    if n >= math.pow(10,p):
+        n = n / 10.
+        e = e + 1
+
+    m = "%.*g" % (p, n)
+
+    if e < -2 or e >= p:
+        out.append(m[0])
+        if p > 1:
+            out.append(".")
+            out.extend(m[1:p])
+        out.append('e')
+        if e > 0:
+            out.append("+")
+        out.append(str(e))
+    elif e == (p -1):
+        out.append(m)
+    elif e >= 0:
+        out.append(m[:e+1])
+        if e+1 < len(m):
+            out.append(".")
+            out.extend(m[e+1:])
+    else:
+        out.append("0.")
+        out.extend(["0"]*-(e+1))
+        out.append(m)
+    return "".join(out)
+
+def _char_before_dp(x):
     """ digits before decimal point """
     x = np.abs(x)
     n = int(np.floor(np.log10(x)))
     if x >= 1:
         return n+1
-    if x < 1:
+    elif x < 1:
         return 0
 
+def _lead_zeros_after_dp(x):
+    """ Number of zero characters after dp and before 1st sf """
+    x = np.abs(x)
+    n = int(np.floor(np.log10(x)))
+    db(n=n)
+    if x < 1:
+        return abs(n+1)
+    elif x >= 1:
+        return 0
 
-def strnsignif(x, nsignif=3, _verbatim=False):
+def strnsignif(x, nsignif=3, scientific=False, _verbatim=False):
     """ Return string format of number to supplied no. of significant figures
     Ideas from: http://stackoverflow.com/questions/3410976/how-to-round-a-number-to-significant-figures-in-python
     Note: Does not round up for: strnsignif(-55.55,nsignif=3 ==> -55.5  -- Not sure why...?"""
     assert nsignif >= 1, 'Negative number of significant figures supplied'
+    nsignif = int(nsignif)
 
-    if _verbatim: print('_before_dp: ',_before_dp(x))
+    if _verbatim: print('_before_dp: ',_char_before_dp(x))
 
+    ## %g rounds, but will give scientific e-7 etc notation, so use %f to get all places
+    ## %s sometimes uses scientific notation, so use %f instead, however always gives 6 dp precision
     format_str = '%.'+str(nsignif)+'g'
-    strn = '%s' % float(format_str % x)
+    strn = '%f' % float(format_str % x)
     ## %s always formats with a decimal point ie .0
 
     ## Remove -ve sign and add it at the end to simplify counting no of characters in string
     if x<0: strn = strn[1:]
 
-    ## Add trailing 0s of precision if they are missing
+    ## Add trailing 0s of precision if they are missing (only used for %s above, not %f)
     if (len(strn)-1) < nsignif:
         strn += '0'*(nsignif-(len(strn)-1))
     ## Remove false trailing .0 giving false impression of precission
-    elif _before_dp(x) >= nsignif:
-            strn = strn.split(sep='.')[0]
+    elif _char_before_dp(x) >= nsignif: # again important if %s used above
+        strn = strn.split(sep='.')[0]
+
+    ## %f always gives at least 6dp of precision therefore remove false zeros
+    if '.' in strn:
+        char_after_dp = len(strn.split(sep='.')[1])
+
+        db(strn=strn)
+        db(_char_before_dp=_char_before_dp(x))
+        db(char_after_dp=char_after_dp)
+        db(_lead_zeros_after_dp=_lead_zeros_after_dp(x))
+
+        extra_zeros = _char_before_dp(x)+char_after_dp - _lead_zeros_after_dp(x) - nsignif
+        # assert extra_zeros >= - _lead_zeros_after_dp(x) 'Displaying too few significant figures...!'
+
+        if extra_zeros==0:
+            ## Can't find way to numerically index final element in range equiv to [0:]
+            strn = strn.split(sep='.')[0]+'.'+ strn.split(sep='.')[1][0:]
+        elif extra_zeros > 0:
+            strn = strn.split(sep='.')[0]+'.'+ strn.split(sep='.')[1][0:-1-(extra_zeros-1)]
 
     ## Add -ve sign if removed
     if x<0: strn = '-'+strn
+
     return strn
 
 
-
 def str_err(value, error, nsf = 1, latex=False, separate=False):
+    """ Given a value and error, finds the position of the first sifnificant
+        digit of the error and returns a string contianing both value and
+        error to the same number of sifnificant digits separated by a +/-
+        Inputs:
+        c      value 		value to be rounded
+            error 		error to determine rounding
+            nsf			number significant figures
+            latex		use latex \pm symbol
+            separated 	return separate value and error strings (overrides '\latex')
+    """
+
+    ## Check for sensible inputs
+    assert error > 0, "str_err received negative error"
+    assert not (error == 0), "str_err received zero valued error"
+    assert nsf >= 1, "str_err received nsf less than 1"
+
+    ## Find number of additional digits needed in value than error assuming 1sf required
+    nsf_val = np.floor(np.log10(abs(value))) - np.floor(np.log10(error))
+
+    ## Add additional sf as requested
+    nsf_val += (nsf)
+
+    ## If last required sf in error is at least an order of magnitude greater than the error display
+    ## no additional digits (not negative additional digits)
+    if nsf_val < 0: nsf_val = 0
+
+    db(nsf_val=nsf_val)
+
+    value_str = strnsignif(value, nsf_val)
+    err_str = strnsignif(error, nsf)
+
+    ## Return keyword depended output format
+    if   (latex == True)  and (separate == False):  # Return single string contianing \pm
+        comb_str = value_str + r" $\pm$ " + err_str
+        return comb_str
+    elif (latex == False) and (separate == False):  # Return single string contianing +/-
+        comb_str = value_str + r" +/- " + err_str
+        return comb_str
+    elif (separate == True): 	# Return value and error in separate strings
+        return value_str, err_str
+
+
+
+def str_err_old(value, error, nsf = 1, latex=False, separate=False):
 	""" Given a value and error, finds the position of the first sifnificant 
 		digit of the error and returns a string contianing both value and
 		error to the same number of sifnificant digits separated by a +/-
@@ -86,7 +225,7 @@ def str_err(value, error, nsf = 1, latex=False, separate=False):
 	## Default format code when error cannot be used to determine sig figs
 	fmt_dflt = ':0.3g'
 
-	## Check input is sensible
+	## Check input is sensible - could use assert
 	if error < 0:
 		print("WARNING: error passed to str_err is -ve")
 		fmt_str = '{'+fmt_dflt+'} +/- (-ve err!)'
