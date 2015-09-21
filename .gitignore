@@ -1,2 +1,4 @@
 redundant
 .idea
+__pycache__
+*.pyc

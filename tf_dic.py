@@ -32,7 +32,7 @@ __version__ = "1.0.1"
 
 # print dir(tf_debug)
 
-db = tf_debug.debug(1,1,1)
+db = tf_debug.debug(0,1,1)
 # debug = 0
 
 def key_search(dict, *args, **kwargs):

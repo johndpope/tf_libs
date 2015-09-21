@@ -29,6 +29,7 @@ import itertools    #
 from pprint import pprint   # Pretty printing
 
 from tf_debug import debug_print as dprint
+import tf_string
 
 # debug = 0
 # plot = 1
@@ -154,13 +155,24 @@ def is_scalar(var):
 
 def safe_len(var):
     """ Length of variable returning 1 instead of type error for scalars """
-    if np.isnan(var):
+    if np.isnan(var): # If value is NaN return zero length
         return 0
-    elif tf.is_scalar(var): # checks if has atribute __len__
+    elif is_scalar(var): # checks if has atribute __len__
         return 1
     else:
         return len(var)
 
+
+
+
+
+def make_tuple(obj):
+    """ In order to itterate over an object which may be a single item or a tuple of items
+    nest a single item in a tuple """
+    if type(obj) == tuple:
+        return obj
+    else:
+        return (obj)
 
 if __name__ == "__main__":
     from test.run_test import test_tf_array

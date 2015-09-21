@@ -23,9 +23,7 @@ __version__ = "1.0.1"
 
 def is_number(s):
     """
-    TODO: Test on numbers and strings
-    :param s:
-    :return:
+    TODO: Test on numbers and strings and arrays
     """
     try:
         n=str(float(s))

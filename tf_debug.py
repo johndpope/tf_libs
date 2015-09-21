@@ -58,7 +58,7 @@ class debug:
         if plot_ON:
             debug.plot_ON = True
 
-        debug_print(1, init_debug_ON=self.debug_ON)
+        debug_print(0, init_debug_ON=self.debug_ON)
 
 
     def __call__(self, *args, **kwargs):

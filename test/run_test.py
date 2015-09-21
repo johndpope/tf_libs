@@ -66,6 +66,8 @@ def test_tf_array():
     print(argsort(l2))
     print(list(l2[i] for i in argsort(l2)))
 
+    print("\nstr_name_value(['val1','val2'], [23432.4576,34654.45764])")
+    print(str_name_value(['value1','val2'], [23.4576,34654.45764]))
 
     return
 
@@ -89,24 +91,30 @@ def test_tf_dic():
 
     return
 
-from tf_array import *
+from tf_dir import *
 def test_tf_dir():
 
     return
 
-from tf_array import *
+from tf_file import *
 def test_tf_file():
 
     return
 
-from tf_array import *
+from tf_numeric import *
 def test_tf_numeric():
 
     return
 
-from tf_array import *
+from tf_plot import *
 def test_tf_plot():
 
+    print('\n*** tf_plots.py demo ***\n')
+
+    mu, sigma = 200, 25
+    x = mu + sigma*np.random.randn(10000)
+    # x = np.linspace(0,100)
+    arr_hist((x,x*.5))
     return
 
 from tf_string import *
@@ -134,7 +142,24 @@ def test_tf_string():
 
     return
 
+from tf_classes import *
+def test_tf_classes():
+    print('\n*** tf_classes.py demo ***\n')
+    I = PhysQuant('Current','I','A')
+    print(I.name)
+
+    x = np.linspace(0.5,50,100)
+    param = ParamFloat(x,'I')
+
+    Plot(title='A param plot')
+    plt.gca().title('new title')
+
+
+    return
+
 if __name__ == "__main__":
 
     # test_tf_array()
-    test_tf_string()
+    # test_tf_string()
+    # test_tf_plot()
+    test_tf_classes()

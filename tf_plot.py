@@ -21,6 +21,8 @@ import matplotlib                   # For transforms etc ?
 from matplotlib import transforms   # For transforms etc
 
 import tf_numeric as tf_num
+import tf_array
+import tf_string
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -42,7 +44,7 @@ def vline_label(x, label, ypos=0.8, xoffset=0.01, color = 'k'):
     plt.axvline( x, linestyle='--', color = color)    
     plt.text(x+xoffset*xran, ypos, label, transform=transy, color = color ) 
 
-def new_axis( ):
+def new_axis(subplot=111):
 	"""
 	Make new plot and reuturn its axes - used for finding axes ranges etc:
 
@@ -51,8 +53,8 @@ def new_axis( ):
 	ax = fig.add_subplot(111)
 	"""
 	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	return ax
+	ax = fig.add_subplot(subplot)
+	return ax, fig
 
 def text_poss( x, y, string, ax, center = False ):
 	""" Given a string, an axis, and fractional axis coordinates, plot text 
@@ -106,27 +108,45 @@ def axis_range( x, pad1=5, pad2=10 ,absolute=False, pass_zero = False):
 
 	return np.array[min, max]
 	
-def arr_hist(arr, nbins=50):
+def arr_hist(arr, nbins='auto', av_per_bin=40):
+    """ Plot histogram of contents of arr
+    setting mbins overrides av_per_bin """
 
-	# the histogram of the data with histtype='step'
-	n, bins, patches = plt.hist(arr, nbins, normed=0, histtype='stepfilled', color=['g','b','c'][0:len(arr)])
-	# plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
+    ## If nbins set to auto choose it so that there are on average av_per_bin
+    if nbins == 'auto':
+        if type(arr) == tuple:
+            nbins = int(len(arr[0])/av_per_bin)
+        else:
+            nbins = int(len(arr)/av_per_bin)
+        ## Make sure there are at least 10 bins
+        if nbins < 10:
+            nbins = 10
 
-	mean = np.mean(arr)
-	# mode = sp.stats.mode(arr)
-	min = np.min(arr)
-	max = np.max(arr)
-	range = max-min
-	stdev = np.std(arr)
-	stats_str = 'Array 1:\nMean: {:0.1f}\nMode: \nMin: {:0.1f}\nMax: {:0.1f}\nRange: {:0.1f}\nStd dev: {:0.1f}'.format(mean, min, max, range, stdev)
-	plt.annotate(stats_str, xy=(0.04, 0.7), xycoords='axes fraction')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    # the histogram of the data with histtype='step'
+    n, bins, patches = plt.hist(arr, nbins, normed=0, histtype='stepfilled', color=['g','b','c'][0:len(arr)])
+    # plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
 
-	plt.show()
+    # mean = np.mean(arr)
+    # # mode = sp.stats.mode(arr)
+    # min = np.min(arr)
+    # max = np.max(arr)
+    # range = max-min
+    # stdev = np.std(arr)
+    # stats_str = 'Array 1:\nMean: {:0.1f}\nMode: \nMin: {:0.1f}\nMax: {:0.1f}\nRange: {:0.1f}\nStd dev: {:0.1f}'.format(mean, min, max, range, stdev)
+    # plt.annotate(stats_str, xy=(0.04, 0.7), xycoords='axes fraction', bbox=dict(boxstyle="round", alpha= 0.5, fc="0.8"))
 
-	# add a line showing the expected distribution
-	# y = sp.stats.normpdf( bins, mu, sigma)
-	# l = plt.plot(bins, y, 'k--', linewidth=1.5)
-	return
+    x = (0.04, 0.8)
+    for i, subarr in enumerate(tf_array.make_tuple(arr)):
+        tf_string.str_moment(subarr, ax = ax, xy=(x[i],0.7))
+
+    plt.show()
+
+    # add a line showing the expected distribution
+    # y = sp.stats.normpdf( bins, mu, sigma)
+    # l = plt.plot(bins, y, 'k--', linewidth=1.5)
+    return
 
 
 if __name__ == "__main__":

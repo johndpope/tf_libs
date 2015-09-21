@@ -18,6 +18,7 @@ Info:
 from itertools import repeat
 import datetime
 import numpy as np
+import matplotlib.pyplot as plt
 import math
 import tf_array
 from tf_debug import debug
@@ -369,6 +370,48 @@ def sort_dates(dates_in, format = "%Y-%m-%d", reverse = True):
     dates.sort(reverse = reverse)
     sorted = [datetime.datetime.strftime(d, format) for d in dates]
     return sorted, indices
+
+def str_name_value(names, values, errors=None, dp=1):
+    """ Return string containing properly formatted names and their values
+    Makes sure that decimal points line up in values
+    eg
+    value1:    23.5
+    val2:   34654.5
+    ^      ^     ^ lined up using as little horizontal space as possible (better than tabs)
+    """
+    assert len(names) == len(values), "inconsistent number of name strings and values"
+    pad1 = np.max([len(s) for s in names])+2 # length of longest name
+    pad2 = str(int(np.floor(np.log10(np.max(values))))+3) # pad spaces
+    # fmt_str = 'Mean:\t{:'+pad+'.1f}\nMode: \nMin:\t{:'+pad+'.1f}\nMax:\t{:'+pad+'.1f}\nRange:\t{:'+pad+'.1f}\nStd dev:{:'+pad+'.1f}'.expandtabs()
+    # print(fmt_str)
+    str_out = ''
+    for name, value in zip(names, values):
+        str_out += '{2:{0}}{3:{1}.1f}\n'.format(pad1, pad2, name+':', value)
+    str_out = str_out.rstrip()
+
+    return str_out
+
+
+def str_moment(arr, ax=None, xy=(0.04, 0.7)):
+    """ Return string containing statistical information about the contents of arr
+    ax: matplotlib axis to annotate stats to """
+
+    mean = np.mean(arr)
+    # mode = sp.stats.mode(arr)
+    min = np.min(arr)
+    max = np.max(arr)
+    range = max-min
+    stdev = np.std(arr)
+
+    values = [mean, min, max, range, stdev]
+    names = ['Mean', 'Min', 'Max', 'Range', 'Stdev']
+
+    stats_str = str_name_value(names, values)
+
+    if ax:
+        plt.annotate(stats_str, xy=xy, xycoords='axes fraction', family='monospace', bbox=dict(boxstyle="round", alpha= 0.5, fc="0.8"))
+
+    return stats_str
 
 def test_print():
 	print("Here is a string")

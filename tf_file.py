@@ -21,7 +21,7 @@ import os
 import re
 # import shutil
 
-from . import tf_numeric
+import tf_numeric
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"

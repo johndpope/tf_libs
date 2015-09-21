@@ -18,6 +18,7 @@ from .tf_file import *
 from .tf_numeric import *
 from .tf_plot import *
 from .tf_string import *
+from .tf_classes import *
 
 
 # from .ext import savitzky_golay  ## Not written by TF: Scipy cookbook
