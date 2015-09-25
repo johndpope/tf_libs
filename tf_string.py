@@ -116,7 +116,7 @@ def ftod(f):
     exponent = m.group(4)
     if ((intpart is None or intpart == '') and
         (fractpart is None or fractpart == '')):
-        raise RuntimeError("unexpected floating point number format: {!a}"
+        raise RuntimeError("unexpected floating point number format: {}"
                            .format(s))
 
     # strip leading and trailing zeros
@@ -167,40 +167,54 @@ def _lead_zeros_after_dp(x):
     elif x >= 1:
         return 0
 
-def strnsignif(x, nsignif=3, scientific=False, _verbatim=False):
+def strnsignif(x, nsf=3, scientific=False, _verbatim=False, standard_form=False):
     """ Return string format of number to supplied no. of significant figures
     Ideas from: http://stackoverflow.com/questions/3410976/how-to-round-a-number-to-significant-figures-in-python
-    Note: Does not round up for: strnsignif(-55.55,nsignif=3 ==> -55.5  -- Not sure why...?"""
-    assert nsignif >= 0, 'Negative number of significant figures supplied'
-    nsignif = int(nsignif)
+    Note: Does not round up for: strnsignif(-55.55,nsf=3 ==> -55.5  -- Not sure why...?"""
+    assert nsf >= 0, 'Negative number of significant figures supplied'
+    nsf = int(nsf)
 
     ## For zero sig fig just return 0.0 (needed for str_err)
-    if nsignif == 0:
+    if nsf == 0:
         x=0
-        nsignif = 1
+        nsf = 1
 
     if _verbatim: print('_before_dp: ',_char_before_dp(x))
 
-    ## %g rounds, but will give scientific e-7 etc notation, so use %f to get all places
-    ## %s sometimes uses scientific notation, so use %f instead, however always gives 6 dp precision
-    format_str = '%.'+str(nsignif)+'g'
-    strn = '%s' % float(format_str % x)
-    print(strn)
-    print(float(strn))
-    strn = ftod(float(strn))
-    print(strn)
-    ## %s always formats with a decimal point ie .0
+    if not standard_form:
+        ## %s %g rounds, but will give standard form notation (e-7 etc) in some cases
+        ## therefore use ftod to always get normal form
+        format_str = '%.'+str(nsf)+'g' # Use 5g to do rounding (very occasional small bugs?)
+        strn = '%s' % float(format_str % x)
+        strn = ftod(float(strn)) # make sure in 'normal' form
+    else:
+        format_str = '%.'+str(nsf)+'g' # Use 5g to do rounding (very occasional small bugs?)
+        strn = '%e' % float(format_str % x)
 
     ## Remove -ve sign and add it at the end to simplify counting no of characters in string
     if x<0: strn = strn[1:]
+    if standard_form:
+        exp_r = re.compile(r'^(-?[0-9]*\.[0-9]*)([eE]([+-][0-9]+))?$')
+        m = exp_r.match(strn)
+        strn = m.group(1)
+        exponent = m.group(2)
+        if strn == '' or exponent == '':
+            raise RuntimeError("unexpected standard form number format: {}"
+                           .format(m.string))
+        ## Remove false trailing 0s giving false impression of precision
+        if len(strn)-1 > nsf: # -1 for dp
+            print(strn)
+            strn = strn[0:nsf+1] # +1 for dp
+            print(strn)
 
     ## Add trailing 0s of precision if they are missing (only used for %s above, not %f)
-    if (len(strn)-1) < nsignif:
-        strn += '0'*(nsignif-(len(strn)-1))
-    ## Remove false trailing .0 giving false impression of precission if %s used above
-    # elif _char_before_dp(x) >= nsignif: # important if %s used above
-    #     strn = strn.split(sep='.')[0]
-    #
+    if (len(strn)-1) < nsf:
+        strn += '0'*(nsf-(len(strn)-1))
+    ## %s always formats with a decimal point ie .0
+    ## Remove false trailing .0 giving false impression of precision if %s used above
+    elif _char_before_dp(x) >= nsf: # important if %s used above
+        strn = strn.split(sep='.')[0]
+
     # ## %f always gives at least 6dp of precision therefore remove false zeros
     # if '.' in strn:
     #     char_after_dp = len(strn.split(sep='.')[1])
@@ -210,7 +224,7 @@ def strnsignif(x, nsignif=3, scientific=False, _verbatim=False):
     #     # db(char_after_dp=char_after_dp)
     #     # db(_lead_zeros_after_dp=_lead_zeros_after_dp(x))
     #
-    #     extra_zeros = _char_before_dp(x)+char_after_dp - _lead_zeros_after_dp(x) - nsignif
+    #     extra_zeros = _char_before_dp(x)+char_after_dp - _lead_zeros_after_dp(x) - nsf
     #     # assert extra_zeros >= - _lead_zeros_after_dp(x) 'Displaying too few significant figures...!'
     #
     #     if extra_zeros==0:
@@ -221,6 +235,7 @@ def strnsignif(x, nsignif=3, scientific=False, _verbatim=False):
 
     ## Add -ve sign if removed
     if x<0: strn = '-'+strn
+    if standard_form: strn += exponent
 
     return strn
 
