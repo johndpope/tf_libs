@@ -21,6 +21,8 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
+## CAN import:    None
+## CANNOT import:
 
 """ Physical constants: 
 ## Physical constants

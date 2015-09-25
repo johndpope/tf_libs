@@ -22,7 +22,7 @@ import re  # Regular expressions
 
 from pprint import pprint  # Pretty printing
 
-from tf_debug import debug as tfdebug
+# from tf_debug import debug as tfdebug
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"

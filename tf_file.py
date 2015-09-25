@@ -21,7 +21,9 @@ import os
 import re
 # import shutil
 
-import tf_numeric
+## CAN import:    tf_debug, tf_array
+## CANNOT import: tf_class
+# from . import tf_numeric
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"

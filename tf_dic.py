@@ -20,7 +20,7 @@ import pylab
 import os
 import shutil
 
-import tf_debug
+from . import tf_debug
 import pprint as pp
 
 __author__ = 'Tom Farley'

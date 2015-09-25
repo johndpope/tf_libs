@@ -159,7 +159,7 @@ def test_tf_classes():
 
 if __name__ == "__main__":
 
-    # test_tf_array()
-    # test_tf_string()
+    test_tf_array()
+    test_tf_string()
     # test_tf_plot()
-    test_tf_classes()
+    # test_tf_classes()

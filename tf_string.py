@@ -20,8 +20,13 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-import tf_array
-from tf_debug import debug
+import re
+
+## CAN import:    tf_array
+## CANNOT import:
+# from tf_libs import tf_array
+import tf_libs.tf_array as tf_array
+# from . import tf_debug
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -30,7 +35,7 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
-db = debug(debug_ON=0, lines_ON = False, plot_ON=False)
+# db = tf_debug.debug(debug_ON=0, lines_ON = False, plot_ON=False)
 
 def to_precision(x,p):
     """ Return a string representation of x formatted with a precision of p
@@ -93,6 +98,56 @@ def to_precision(x,p):
         out.append(m)
     return "".join(out)
 
+
+_ftod_r = re.compile(
+    r'^(-?)([0-9]*)(?:\.([0-9]*))?(?:[eE]([+-][0-9]+))?$')
+def ftod(f):
+    """Print a floating-point number in the format expected by PDF:
+    as short as possible, no exponential notation.
+    Taken from: https://stackoverflow.com/questions/8345795/force-python-to-not-output-a-float-in-standard-form-scientific-notation-expo/30754233#30754233"""
+    s = str(f)
+    m = _ftod_r.match(s)
+    if not m:
+        raise RuntimeError("unexpected floating point number format: {!a}"
+                           .format(s))
+    sign = m.group(1)
+    intpart = m.group(2)
+    fractpart = m.group(3)
+    exponent = m.group(4)
+    if ((intpart is None or intpart == '') and
+        (fractpart is None or fractpart == '')):
+        raise RuntimeError("unexpected floating point number format: {!a}"
+                           .format(s))
+
+    # strip leading and trailing zeros
+    if intpart is None: intpart = ''
+    # else: intpart = intpart.lstrip('0') # keep zero before dp
+    if fractpart is None: fractpart = ''
+    # else: fractpart = fractpart.rstrip('0') # keep sig fig zeros
+
+    if intpart == '' and fractpart == '':
+        # zero or negative zero; negative zero is not useful in PDF
+        # we can ignore the exponent in this case
+        return '0'
+
+    # convert exponent to a decimal point shift
+    elif exponent is not None:
+        exponent = int(exponent)
+        exponent += len(intpart)
+        digits = intpart + fractpart
+        if exponent <= 0:
+            return sign + '.' + '0'*(-exponent) + digits
+        elif exponent >= len(digits):
+            return sign + digits + '0'*(exponent - len(digits))
+        else:
+            return sign + digits[:exponent] + '.' + digits[exponent:]
+
+    # no exponent, just reassemble the number
+    elif fractpart == '':
+        return sign + intpart # no need for trailing dot
+    else:
+        return sign + intpart + '.' + fractpart
+
 def _char_before_dp(x):
     """ digits before decimal point """
     x = np.abs(x)
@@ -106,7 +161,7 @@ def _lead_zeros_after_dp(x):
     """ Number of zero characters after dp and before 1st sf """
     x = np.abs(x)
     n = int(np.floor(np.log10(x)))
-    db(n=n)
+    # db(n=n)
     if x < 1:
         return abs(n+1)
     elif x >= 1:
@@ -116,15 +171,24 @@ def strnsignif(x, nsignif=3, scientific=False, _verbatim=False):
     """ Return string format of number to supplied no. of significant figures
     Ideas from: http://stackoverflow.com/questions/3410976/how-to-round-a-number-to-significant-figures-in-python
     Note: Does not round up for: strnsignif(-55.55,nsignif=3 ==> -55.5  -- Not sure why...?"""
-    assert nsignif >= 1, 'Negative number of significant figures supplied'
+    assert nsignif >= 0, 'Negative number of significant figures supplied'
     nsignif = int(nsignif)
+
+    ## For zero sig fig just return 0.0 (needed for str_err)
+    if nsignif == 0:
+        x=0
+        nsignif = 1
 
     if _verbatim: print('_before_dp: ',_char_before_dp(x))
 
     ## %g rounds, but will give scientific e-7 etc notation, so use %f to get all places
     ## %s sometimes uses scientific notation, so use %f instead, however always gives 6 dp precision
     format_str = '%.'+str(nsignif)+'g'
-    strn = '%f' % float(format_str % x)
+    strn = '%s' % float(format_str % x)
+    print(strn)
+    print(float(strn))
+    strn = ftod(float(strn))
+    print(strn)
     ## %s always formats with a decimal point ie .0
 
     ## Remove -ve sign and add it at the end to simplify counting no of characters in string
@@ -133,27 +197,27 @@ def strnsignif(x, nsignif=3, scientific=False, _verbatim=False):
     ## Add trailing 0s of precision if they are missing (only used for %s above, not %f)
     if (len(strn)-1) < nsignif:
         strn += '0'*(nsignif-(len(strn)-1))
-    ## Remove false trailing .0 giving false impression of precission
-    elif _char_before_dp(x) >= nsignif: # again important if %s used above
-        strn = strn.split(sep='.')[0]
-
-    ## %f always gives at least 6dp of precision therefore remove false zeros
-    if '.' in strn:
-        char_after_dp = len(strn.split(sep='.')[1])
-
-        db(strn=strn)
-        db(_char_before_dp=_char_before_dp(x))
-        db(char_after_dp=char_after_dp)
-        db(_lead_zeros_after_dp=_lead_zeros_after_dp(x))
-
-        extra_zeros = _char_before_dp(x)+char_after_dp - _lead_zeros_after_dp(x) - nsignif
-        # assert extra_zeros >= - _lead_zeros_after_dp(x) 'Displaying too few significant figures...!'
-
-        if extra_zeros==0:
-            ## Can't find way to numerically index final element in range equiv to [0:]
-            strn = strn.split(sep='.')[0]+'.'+ strn.split(sep='.')[1][0:]
-        elif extra_zeros > 0:
-            strn = strn.split(sep='.')[0]+'.'+ strn.split(sep='.')[1][0:-1-(extra_zeros-1)]
+    ## Remove false trailing .0 giving false impression of precission if %s used above
+    # elif _char_before_dp(x) >= nsignif: # important if %s used above
+    #     strn = strn.split(sep='.')[0]
+    #
+    # ## %f always gives at least 6dp of precision therefore remove false zeros
+    # if '.' in strn:
+    #     char_after_dp = len(strn.split(sep='.')[1])
+    #
+    #     # db(strn=strn)
+    #     # db(_char_before_dp=_char_before_dp(x))
+    #     # db(char_after_dp=char_after_dp)
+    #     # db(_lead_zeros_after_dp=_lead_zeros_after_dp(x))
+    #
+    #     extra_zeros = _char_before_dp(x)+char_after_dp - _lead_zeros_after_dp(x) - nsignif
+    #     # assert extra_zeros >= - _lead_zeros_after_dp(x) 'Displaying too few significant figures...!'
+    #
+    #     if extra_zeros==0:
+    #         ## Can't find way to numerically index final element in range equiv to [0:]
+    #         strn = strn.split(sep='.')[0]+'.'+ strn.split(sep='.')[1][0:]
+    #     elif extra_zeros > 0:
+    #         strn = strn.split(sep='.')[0]+'.'+ strn.split(sep='.')[1][0:-1-(extra_zeros-1)]
 
     ## Add -ve sign if removed
     if x<0: strn = '-'+strn
@@ -188,7 +252,7 @@ def str_err(value, error, nsf = 1, latex=False, separate=False):
     ## no additional digits (not negative additional digits)
     if nsf_val < 0: nsf_val = 0
 
-    db(nsf_val=nsf_val)
+    # db(nsf_val=nsf_val)
 
     value_str = strnsignif(value, nsf_val)
     err_str = strnsignif(error, nsf)

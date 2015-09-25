@@ -28,12 +28,14 @@ import itertools    #
 
 from pprint import pprint   # Pretty printing
 
-from tf_debug import debug_print as dprint
-import tf_string
+## CAN import:
+## CANNOT import: tf_string
+# from . import tf_debug.debug_print as dprint
+# from . import tf_debug
+# from . import tf_string
+# import tf_string
 
-# debug = 0
-# plot = 1
-
+# db = tf_debug.debug(0,0,0)
 
 def argsort(seq, reverse=False):
     """ Return indices of sorted (assernding) list """
@@ -155,15 +157,12 @@ def is_scalar(var):
 
 def safe_len(var):
     """ Length of variable returning 1 instead of type error for scalars """
-    if np.isnan(var): # If value is NaN return zero length
+    if len(var == np.nan) == 1 and var == np.nan: # If value is NaN return zero length
         return 0
     elif is_scalar(var): # checks if has atribute __len__
         return 1
     else:
         return len(var)
-
-
-
 
 
 def make_tuple(obj):
@@ -172,11 +171,21 @@ def make_tuple(obj):
     if type(obj) == tuple:
         return obj
     else:
-        return (obj)
+        return (obj,)
+
+def tup0(obj):
+    """ If obj is a tuple return its first element, else return obj unchanged """
+    if type(obj) == tuple:
+        return obj[0]
+    else:
+        return obj
+
 
 if __name__ == "__main__":
     from test.run_test import test_tf_array
     test_tf_array()
+
+
 
 
     # x = np.linspace(0,10,101)

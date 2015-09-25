@@ -14,14 +14,15 @@ Info:
     @since: 18/09/2015
 """
 
+import os
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-import matplotlib                   # For transforms etc ?
+import matplotlib as mpl                  # For transforms etc ?
 from matplotlib import transforms   # For transforms etc
 
-import tf_numeric as tf_num
-import tf_array
+# from . import tf_numeric
+import tf_libs.tf_array
 import tf_string
 
 __author__ = 'Tom Farley'
@@ -31,18 +32,38 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
+def set_mpl_defaults(defaults=0):
+	""" Sets defaults for future mpl plots this session
+	defaults = 0: Normal mpl defaults
+			 = 1: More readable
+			 = 2: Publication setting """
+	if defaults == 0: # matplotlib defaults
+		mpl.rcdefaults()
+	elif defaults == 1:
+		ax_labelsize = 20
+		ax_titlesize = 22
+		tick_labelsize = 'large'
+		major_tick = dict(size=6, width=1.5, pad=4)
+		minor_tick = dict(size=3, width=1, pad=4)
+		lines = dict(linewidth=2.0, markersize=8)
 
-def vline_label(x, label, ypos=0.8, xoffset=0.01, color = 'k'):
-    """ Plot labeled vline, x in data coordinates, y in axis coordinates """
-    fig = plt.gcf()
-    ax = plt.gca()
-    xlim = plt.xlim() # could use ax.get_xlim()
-    xran = xlim[1] - xlim[0]
-    # The x coords of this transformation are data, and the y coord are axes
-    transy = transforms.blended_transform_factory(
-                        ax.transData, ax.transAxes)  
-    plt.axvline( x, linestyle='--', color = color)    
-    plt.text(x+xoffset*xran, ypos, label, transform=transy, color = color ) 
+		mpl.rc('axes', labelsize=ax_labelsize, titlesize = ax_titlesize)
+
+		mpl.rc('xtick', labelsize=tick_labelsize)
+		mpl.rc('ytick', labelsize=tick_labelsize)
+
+		mpl.rc('xtick.major', **major_tick)
+		mpl.rc('xtick.minor', **minor_tick)
+
+		mpl.rc('ytick.major', **major_tick)
+		mpl.rc('ytick.minor', **minor_tick)
+
+		mpl.rc('lines', **lines)
+
+	else:
+		raise ValueError('mpl defaults defaults \'%d\' not recognised' % defaults)
+
+	return
 
 def new_axis(subplot=111):
 	"""
@@ -55,6 +76,18 @@ def new_axis(subplot=111):
 	fig = plt.figure()
 	ax = fig.add_subplot(subplot)
 	return ax, fig
+
+def vline_label(x, label, ypos=0.8, xoffset=0.01, color = 'k'):
+    """ Plot labeled vline, x in data coordinates, y in axis coordinates """
+    fig = plt.gcf()
+    ax = plt.gca()
+    xlim = plt.xlim() # could use ax.get_xlim()
+    xran = xlim[1] - xlim[0]
+    # The x coords of this transformation are data, and the y coord are axes
+    transy = transforms.blended_transform_factory(
+                        ax.transData, ax.transAxes)
+    plt.axvline( x, linestyle='--', color = color)
+    plt.text(x+xoffset*xran, ypos, label, transform=transy, color = color )
 
 def text_poss( x, y, string, ax, center = False ):
 	""" Given a string, an axis, and fractional axis coordinates, plot text 
@@ -85,29 +118,74 @@ def text_poss( x, y, string, ax, center = False ):
 	# y_data = tf_num.frac_range( ax_limits[2:4], y )
 	# plt.text( string, x_data, y_data )
 
-def axis_range( x, pad1=5, pad2=10 ,absolute=False, pass_zero = False):
+def extend_range(lims, pad=[5,5], absolute=False, pass_zero = False):
 	""" Extend range of two element array
 	"""
-	assert (len(x) == 2), 'Not two element array'
+	assert (len(lims) == 2), 'Not two element array'
 	if ~absolute:
 		## Pad percentage values
-		pad1 /= 100.0 # Convert to percentage
-		pad2 /= 100.0
+		pad[0] /= 100.0 # Convert to percentage
+		pad[1] /= 100.0
 
-	min = min(x)
-	max = max(x)
-	range = tf_num.range_of(x)
+	lims_min = min(lims)
+	lims_max = max(lims)
+	range = lims_max - lims_min
 
 	if pass_zero:
-		min = min(x)-pad1*range
+		lims_min = lims_min - pad[0]*range
 	else:
-		if (min(x)-pad1*range)*min < 0: 	# if extension of min changes sign of min stop at 0
-			min = 0
+		## Stop extended range passing xzero (the origin)
+		if (lims_min-pad[0]*range)*lims_min < 0: 	# if extension of min changes sign of min stop at 0
+			lims_min = 0
 
-	max = max(x)+pad2*range
+	lims_max = lims_max + pad[1]*range
 
-	return np.array[min, max]
-	
+	return np.array([lims_min, lims_max])
+
+def axis_range(ax, padx = [5,5], pady = [5,5], **kwargs):
+	""" Extend axis ranges by given percentages
+	Default to extend x and y ranges by 5%
+	Set pass_zero = True, to allow range to cross origin
+	"""
+	x_range = ax.get_xlim()
+	y_range = ax.get_ylim()
+
+	ax.set_autoscalex_on(False)
+	ax.set_autoscaley_on(False)
+
+	ax.set_xlim(extend_range(x_range, pad = padx, **kwargs))
+	ax.set_ylim(extend_range(y_range, pad = pady, **kwargs))
+
+
+def legend_dflt(ax, handles=None, labels=None, **kwargs):
+	""" Add a legend to an axis with nice default behaviour	"""
+	options = { 'loc' : 'best',
+				'ncol' : 1,
+				'title' : None,
+				'framealpha' : 0.5,
+				'fontsize' : 18,
+				'fancybox' : True }
+
+	options.update(kwargs)
+	if handles and labels:
+		legend = ax.legend(handles, labels, **kwargs)
+	else:
+		legend = ax.legend(**options)
+
+	legend.draggable(state=True)
+	return legend
+
+def update_colors(ax, cm = 'jet', update_legend=True, min_lines=6):
+	""" Update colour of existing lines to span colour table range
+	Function from: http://stackoverflow.com/questions/20040597/matplotlib-change-colormap-after-the-fact """
+	if cm and len(ax.lines) >= min_lines:
+		lines = ax.lines
+		cm = plt.get_cmap(cm) # Get colour map: eg OrRd, jet
+		colors = cm(np.linspace(0, 1, len(lines)))
+		for line, c in zip(lines, colors):
+			line.set_color(c)
+		if update_legend: legend_dflt(ax) # Update legend so its colours match the lines
+
 def arr_hist(arr, nbins='auto', av_per_bin=40):
     """ Plot histogram of contents of arr
     setting mbins overrides av_per_bin """
@@ -124,29 +202,36 @@ def arr_hist(arr, nbins='auto', av_per_bin=40):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    # the histogram of the data with histtype='step'
+    ## the histogram of the data with histtype='step'
     n, bins, patches = plt.hist(arr, nbins, normed=0, histtype='stepfilled', color=['g','b','c'][0:len(arr)])
-    # plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
 
-    # mean = np.mean(arr)
-    # # mode = sp.stats.mode(arr)
-    # min = np.min(arr)
-    # max = np.max(arr)
-    # range = max-min
-    # stdev = np.std(arr)
-    # stats_str = 'Array 1:\nMean: {:0.1f}\nMode: \nMin: {:0.1f}\nMax: {:0.1f}\nRange: {:0.1f}\nStd dev: {:0.1f}'.format(mean, min, max, range, stdev)
-    # plt.annotate(stats_str, xy=(0.04, 0.7), xycoords='axes fraction', bbox=dict(boxstyle="round", alpha= 0.5, fc="0.8"))
+    # plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
 
     x = (0.04, 0.8)
     for i, subarr in enumerate(tf_array.make_tuple(arr)):
         tf_string.str_moment(subarr, ax = ax, xy=(x[i],0.7))
 
     plt.show()
-
-    # add a line showing the expected distribution
-    # y = sp.stats.normpdf( bins, mu, sigma)
-    # l = plt.plot(bins, y, 'k--', linewidth=1.5)
     return
+
+def save_fig(fig, dir_fig='./Figures/', fn='Figure_tmp', ext='.png', dpi=300, silent=False, create_dir=False):
+	""" Save figure as image """
+	## If directory does not exist, create it if required
+	if not create_dir:
+		assert(os.path.isdir(dir_fig),'Path %s does not exist.')
+	elif not os.path.isdir(dir_fig):
+		os.makedirs(dir_fig)
+
+	path = dir_fig+fn+ext
+	try:
+		fig.savefig( dir_fig+fn+ext, dpi=dpi )
+		if not silent:
+			print('Saved:  '+repr(fn+ext)+'\t\t to '+repr(dir_fig)) # Use repr for inverted commas
+	except FileNotFoundError as e: #
+		print('WARNING: Driectory: %s does not exist. %s' % (dir_fig, repr(e)))
+		print('Failed to save file: %s' % fn+ext)
+
+	return
 
 
 if __name__ == "__main__":

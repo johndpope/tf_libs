@@ -24,12 +24,12 @@ from scipy.interpolate import interp1d              # Interpolation
 
 from pprint import pprint   # Pretty printing
 
-import tf_libs as tf
+## CAN import:    tf_debug, tf_array
+## CANNOT import: tf_class
+# from tf_libs.tf_debug import debug_print as dprint
 
-from tf_libs.tf_debug import debug_print as dprint
-
-from tf_libs.tf_debug import debug as tfdebug
-db = tfdebug(1,1)
+from . import tf_debug
+db = tf_debug.debug(0,1,1)
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -37,9 +37,6 @@ __credits__ = []
 __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
-
-# debug = 0
-# plot = 1
 
 def interp_val(x, y, x0, kind='linear'):
     "Interpolated y value at x0 (scipy.interpolate.interp1d wrapper)"

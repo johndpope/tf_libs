@@ -31,11 +31,11 @@ __status__ = "Development"
 __version__ = "1.0.1"
 
 
-class debug:
+class debug: # Make upper case!
     """ Debugging features """
-    debug_ON = False
-    plot_ON = False
-    lines_ON = False
+    debug_ON_class = False
+    plot_ON_class = False
+    lines_ON_class = False
     init = False
     ndebug_ON = 0
     nOFF = 0
@@ -49,26 +49,27 @@ class debug:
         if (not debug.init) and debug_ON:
             print(whereami(level=1)+'tf_libs <debug> instance created')#.format(self.line)
             debug.init = True
-        if debug_ON:
-            self.debug_ON = True
-        else:
-            self.debug_ON = False
-        if lines_ON:
-            debug.lines_ON = True
+        self.debug_ON = debug_ON
+        self.lines_ON = lines_ON
+        self.plot_ON = plot_ON
         if plot_ON:
-            debug.plot_ON = True
+            self.plot_ON = True
 
         debug_print(0, init_debug_ON=self.debug_ON)
 
 
     def __call__(self, *args, **kwargs):
+        """ Perform a debug print (or plot if requested) """
+        ## Extract specific keywords
         plot = kwargs.pop('plot', False)
+        force = kwargs.pop('FORCE', False) ## Force this call to print even if instance turned off
+
         self.line = inspect.currentframe().f_back.f_lineno
 
         if not plot: # Normal debug print opperation
             # debug_print(1, debug_ON=self.debug_ON)
-            if self.debug_ON:
-                if debug.lines_ON:
+            if self.debug_ON or force:
+                if self.lines_ON or force:
                     print(module_name(level=1)+', '+line_no(level=1)+': ', end=' ')
                 debug_print(self.debug_ON, *args, **kwargs)
                 debug.ndebug_ON += 1
