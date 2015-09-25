@@ -240,7 +240,7 @@ def strnsignif(x, nsf=3, scientific=False, _verbatim=False, standard_form=False)
     return strn
 
 
-def str_err(value, error, nsf = 1, latex=False, separate=False):
+def str_err(value, error, nsf = 1, max_lead_zero = 1, latex=False, separate=False):
     """ Given a value and error, finds the position of the first sifnificant
         digit of the error and returns a string contianing both value and
         error to the same number of sifnificant digits separated by a +/-
@@ -266,22 +266,28 @@ def str_err(value, error, nsf = 1, latex=False, separate=False):
     ## If last required sf in error is at least an order of magnitude greater than the error display
     ## no additional digits (not negative additional digits)
     if nsf_val < 0: nsf_val = 0
-
-    # db(nsf_val=nsf_val)
-
-    value_str = strnsignif(value, nsf_val)
-    err_str = strnsignif(error, nsf)
-
-    ## Return keyword depended output format
-    if   (latex == True)  and (separate == False):  # Return single string contianing \pm
-        comb_str = value_str + r" $\pm$ " + err_str
-        return comb_str
-    elif (latex == False) and (separate == False):  # Return single string contianing +/-
-        comb_str = value_str + r" +/- " + err_str
-        return comb_str
-    elif (separate == True): 	# Return value and error in separate strings
-        return value_str, err_str
-
+    
+    ## Keyword dependent output format
+    if   (latex == True):  # for single string containing latex \pm
+        pm = r" $\pm$ "
+    else:  # for  single string containing +/-
+        pm = r" +/- "
+        
+    if (_lead_zeros_after_dp(error) < max_lead_zero) or separate:
+        value_str = strnsignif(value, nsf_val)
+        err_str = strnsignif(error, nsf)
+        if (separate == True): 	# Return value and error in separate strings
+            return value_str, err_str    
+        else:
+            comb_str = value_str + pm + err_str
+            return comb_str
+    else: # Too many dp: display as (4.12+/-0.03)e-7
+        pow = int(np.floor(np.log10(np.abs(value))))
+        shift = 10**(-(pow))
+        value_str = strnsignif(value*shift, nsf_val)
+        err_str = strnsignif(error*shift, nsf)
+        str_exp = '('+value_str+pm+err_str+')e%d' % pow
+        return str_exp
 
 
 def str_err_old(value, error, nsf = 1, latex=False, separate=False):
