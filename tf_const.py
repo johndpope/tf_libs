@@ -75,8 +75,10 @@ def poly(x, *args, str_eqn=False):
     for arg in args:
         sum += arg * x**pow
         if str_eqn: eqn.insert(0,'{}x^{}'.format(arg,pow))
+    ## Need to rejoin string segments here
 
-    
+    ##
+
     return sum
 
 def exp(*args):

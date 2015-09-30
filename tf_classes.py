@@ -53,28 +53,113 @@ class PhysQuant(object):
         self.unit  = unit
 
 
-class ParamFloat():
+class ParamFloat(np.ndarray):
     """ Experimental parameter of float type """
 
-    def __init__(self, value, phys_quant, error=None, fn=None, description=None):
-        self.value = value
-
+    def __new__(cls, input_array, phys_quant, error=None, fn=None, description=None):
+        # Input array is an already formed ndarray instance
+        # We first cast to be our class type
+        obj = np.asarray(input_array).view(cls)
+        # add the new attribute to the created instance
+        # obj.info = info
+        
+        
         if type(phys_quant) == str:
-            self.phys_quant = self.get_dflt_phys_quant(phys_quant)
-            self.name = self.phys_quant.name
-            self.symbol = self.phys_quant.symbol
-            self.unit = self.phys_quant.unit
+            obj.phys_quant = obj.get_dflt_phys_quant(phys_quant)
+            obj.name = obj.phys_quant.name
+            obj.symbol = obj.phys_quant.symbol
+            obj.unit = obj.phys_quant.unit
         elif len(phys_quant) == 3:
-            self.phys_quant = PhysQuant(phys_quant[0],phys_quant[1],phys_quant[2])
-            self.name = phys_quant[0]
-            self.symbol = phys_quant[1]
-            self.unit = phys_quant[2]
+            obj.phys_quant = PhysQuant(phys_quant[0],phys_quant[1],phys_quant[2])
+            obj.name = phys_quant[0]
+            obj.symbol = phys_quant[1]
+            obj.unit = phys_quant[2]
         else:
             assert (type(phys_quant) == str) or (len(phys_quant) == 3), 'Incorrect type/format for phys_quant'
 
-        self.error = error
-        self.fn    = fn
-        self.description = description
+        obj.error = error
+        obj.fn    = fn
+        obj.description = description
+        
+        
+        
+        
+        # Finally, we must return the newly created object:
+        return obj
+
+    def __array_finalize__(self, obj):
+        # ``self`` is a new object resulting from
+        # ndarray.__new__(InfoArray, ...), therefore it only has
+        # attributes that the ndarray.__new__ constructor gave it -
+        # i.e. those of a standard ndarray.
+        #
+        # We could have got to the ndarray.__new__ call in 3 ways:
+        # From an explicit constructor - e.g. InfoArray():
+        #    obj is None
+        #    (we're in the middle of the InfoArray.__new__
+        #    constructor, and self.info will be set when we return to
+        #    InfoArray.__new__)
+        if obj is None: return
+        # From view casting - e.g arr.view(InfoArray):
+        #    obj is arr
+        #    (type(obj) can be InfoArray)
+        # From new-from-template - e.g infoarr[:3]
+        #    type(obj) is InfoArray
+        #
+        # Note that it is here, rather than in the __new__ method,
+        # that we set the default value for 'info', because this
+        # method sees all creation of default objects - with the
+        # InfoArray.__new__ constructor, but also with
+        # arr.view(InfoArray).
+        self.phys_quant = getattr(obj, 'phys_quant', 'arb')  # Default if not found is 3rd argument
+        self.error = getattr(obj, 'error', None)  # Default if not found is 3rd argument
+        self.fn = getattr(obj, 'fn', None)  # Default if not found is 3rd argument
+        self.description = getattr(obj, 'description', None)  # Default if not found is 3rd argument
+
+        if type(self.phys_quant) == str:
+            self.phys_quant = self.get_dflt_phys_quant(self.phys_quant)
+            self.name = self.phys_quant.name
+            self.symbol = self.phys_quant.symbol
+            self.unit = self.phys_quant.unit
+        elif ((type(self.phys_quant) == tuple) and (len(self.phys_quant) == 3)):
+            self.phys_quant = PhysQuant(self.phys_quant[0],self.phys_quant[1],self.phys_quant[2])
+            self.name = self.phys_quant[0]
+            self.symbol = self.phys_quant[1]
+            self.unit = self.phys_quant[2]        
+        if type(self.phys_quant) == PhysQuant:
+            self.name = self.phys_quant.name
+            self.symbol = self.phys_quant.symbol
+            self.unit = self.phys_quant.unit
+        else:
+            raise('Incorrect type/format for phys_quant')
+
+        # print(self[:])
+
+        # We do not need to return anything
+
+    def __init__(self, value, phys_quant, error=None, fn=None, description=None):
+        pass
+        # self[:] = value
+        #
+        # if type(phys_quant) == str:
+        #     self.phys_quant = self.get_dflt_phys_quant(phys_quant)
+        #     self.name = self.phys_quant.name
+        #     self.symbol = self.phys_quant.symbol
+        #     self.unit = self.phys_quant.unit
+        # elif len(phys_quant) == 3:
+        #     self.phys_quant = PhysQuant(phys_quant[0],phys_quant[1],phys_quant[2])
+        #     self.name = phys_quant[0]
+        #     self.symbol = phys_quant[1]
+        #     self.unit = phys_quant[2]
+        # else:
+        #     assert (type(phys_quant) == str) or (len(phys_quant) == 3), 'Incorrect type/format for phys_quant'
+        #
+        # self.error = error
+        # self.fn    = fn
+        # self.description = description
+
+
+
 
         # self.lname = name.lower()
         # self.uname = name.capitalize()
@@ -83,46 +168,47 @@ class ParamFloat():
         # self.fn    = params
 
     def __repr__(self):
-        return 'ParamFloat<'+self.name+'> object'
+        return 'ParamFloat<'+self.name+' ['+self.unit+']>'
 
     def __str__(self):
-        #print help(self.value)
-        return self.name+' = '+repr(self.value)+' '+self.unit
+        #print help(self[:])
+        # return self.name+' = '+repr(self[:])+' '+self.unit
+        return self.name+': '+np.ndarray.__str__(self) +' '+self.unit
 
-    def __call__(self):
-        " Value of float parameter "
-        return self.value
+    # def __call__(self):
+    #     " Value of float parameter "
+    #     return self[:]
+    #
+    # def __getitem__(self,index):
+    #     if tf_array.is_scalar(self[:]):
+    #         raise IndexError('This <float parameter> is scalar and cannot be indexed')
+    #     return self[:][index]
+    #
+    # def __len__(self):
+    #     """ Length of parameter value array """
+    #     return tf_array.safe_len(self[:])
 
-    def __getitem__(self,index):
-        if tf_array.is_scalar(self.value):
-            raise IndexError('This <float parameter> is scalar and cannot be indexed')
-        return self.value[index]
-
-    def __len__(self):
-        """ Length of parameter value array """
-        return tf_array.safe_len(self.value)
-
-    def __copy__(self):
-        ## Shallow copy
-        return type(self)(self.name, self.unit, self.value, fn=self.fn)
-
-    def __deepcopy__(self):
-        ## Broken?
-        return copy.deepcopy(type(self)(self.name, self.unit, self.value, fn=self.fn))
-
-    def __del__(self):
-        """ Unfinished """
-        class_name = self.__class__.__name__
+    # def __copy__(self):
+    #     ## Shallow copy
+    #     return type(self)(self.name, self.unit, self[:], fn=self.fn)
+    #
+    # def __deepcopy__(self):
+    #     ## Broken?
+    #     return copy.deepcopy(type(self)(self.name, self.unit, self[:], fn=self.fn))
+    #
+    # def __del__(self):
+    #     """ Unfinished """
+    #     class_name = self.__class__.__name__
 
     def fit(self, func='poly8', x0=[]):
-        """
-        """
+        """ Values from fitting func to self[:]s vs regularly spaced x variable using sp.curvefit """
+        pass
 
     def valueSI(self):
         if self.unit == 'mTorr':
-            return self.value * 133.3224e-3
+            return self[:] * 133.3224e-3
         elif self.unit == 'eV':
-            return self.value * 1.60217657e-19 / 1.3806488e-23
+            return self[:] * 1.60217657e-19 / 1.3806488e-23
 
     def label(self):
         return self.name+' ['+self.unit+']'
@@ -135,13 +221,15 @@ class ParamFloat():
             return self.name
 
     def val_unit(self):
-        return repr(self.value)+' '+self.unit
+        return repr(self[:])+' '+self.unit
 
     def update(self, value):
-        self.value = value
+        self[:] = value
 
-    def info(self):
-        pprint (vars(self))
+    def info(self, quiet=False):
+        if not quiet:
+            pprint (vars(self))
+        return vars(self)
 
     def get_dflt_phys_quant(self, symbol):
         dflts = {
@@ -156,6 +244,7 @@ class ParamFloat():
         assert symbol in dflts.keys(), 'Symbol for physical quantity not recognised'
 
         return PhysQuant(dflts[symbol][0],symbol,dflts[symbol][1])
+
 
 
 
@@ -198,8 +287,9 @@ class Plot(object): # Inherit plt.figure ?
     nfig = 0 # Counter for number of Plot objects in existence
     def __init__(self, x=None, y=None, title = None, subplot=111, defaults=1, text=None, block=True, dir_fig = './Figures/', fn='Figure_tmp', cm='jet'):
         ## Check arguments are as expected
-        if x: assert type(x) == ParamFloat, 'x plotting variable must be a <ParamFloat> (tuple not accepted)'
-        if y: assert type(y) == ParamFloat or (type(y) == tuple and type(y[0])==ParamFloat), 'y plotting variable must be a <ParamFloat> or tuple of <ParamFloat>s'
+        db(tx=type(x))
+        if not x==None: assert type(x) == ParamFloat, 'x plotting variable must be a <ParamFloat> (tuple not accepted)'
+        if not y==None: assert type(y) == ParamFloat or (type(y) == tuple and type(y[0])==ParamFloat), 'y plotting variable must be a <ParamFloat> or tuple of <ParamFloat>s'
         if text: assert (type(text)==tuple and len(text)>=3), 'text keyword must have format (x,y,str,{fontsize})'
 
         PlotLines.nfig += 1  # Increase counter for number of plot instances
@@ -229,9 +319,9 @@ class Plot(object): # Inherit plt.figure ?
         ## Set axis title and labels
         if self.title:
             self.set_title(title)
-        if self.x:
+        if not self.x == None:
             self.set_xlabel(self.x.label())
-        if self.y:
+        if not self.y == None:
             self.set_ylabel(self.y[0].label()) # set y axis using first y parameter in tuple
 
         if text:
@@ -317,22 +407,26 @@ class PlotLines(Plot):
             self.block = block
         y = tf_array.make_tuple(y)
         for l in y: # Loop over y parameters and plot a line for each (a single y param is nested in a tuple)
-            line = self.ax.plot(self.x.value, l.value, label=l.legend())
+            line = self.ax.plot(self.x, l, label=l.legend())
             self.lines.append(line)
         if not self._internal:
             pass
             self.update_colours(cm=self.cm) # Is this needed here?
             self.add_legend() # Update legend with new lines when called individually
+            self.update_ranges(padx=self.padx, pady = self.pady, pass_zero=self.pass_zero)
+            db('updated colours, legend and ranges')
+        db(internal=self._internal)
         self.show()
 
     def refresh_lines(self):
         """ Redraw existing lines stored in self.lines, without appending any new elements
+        Redundant now using _internal flag
         """
 
-    def update_colours(self, cm='jet'):
+    def update_colours(self, cm='jet', min_lines=6):
         """ Update line colours to span supplied colour map """
         self.cm = cm
-        tfp.update_colors(self.ax, cm=cm)
+        tfp.update_colors(self.ax, cm=cm, min_lines=min_lines)
 
     def update_ranges(self, padx = [5, 5], pady = [5, 5], pass_zero=False):
         """ Update axis ranges """
