@@ -33,9 +33,9 @@ from pprint import pprint  # Pretty printing
 
 ## CAN import:    all tf_* files
 ## CANNOT import: None
-import tf_array
-import tf_plot as tfp
-import tf_debug
+import tf_libs.tf_array as tf_array
+import tf_libs.tf_plot as tfp
+import tf_libs.tf_debug as tf_debug
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -114,6 +114,10 @@ class ParamFloat():
         """ Unfinished """
         class_name = self.__class__.__name__
 
+    def fit(self, func='poly8', x0=[]):
+        """
+        """
+
     def valueSI(self):
         if self.unit == 'mTorr':
             return self.value * 133.3224e-3
@@ -191,22 +195,36 @@ class Data(object):
     """
 
 class Plot(object): # Inherit plt.figure ?
-    def __init__(self, x=None, y=None, title = None, subplot=111, defaults=1):
+    nfig = 0 # Counter for number of Plot objects in existence
+    def __init__(self, x=None, y=None, title = None, subplot=111, defaults=1, text=None, block=True, dir_fig = './Figures/', fn='Figure_tmp', cm='jet'):
         ## Check arguments are as expected
-        if x: assert type(y) == ParamFloat or (type(y) == tuple and type(y[0])==ParamFloat), 'y plotting variable must be a <ParamFloat> or tuple of <ParamFloat>s'
+        if x: assert type(x) == ParamFloat, 'x plotting variable must be a <ParamFloat> (tuple not accepted)'
         if y: assert type(y) == ParamFloat or (type(y) == tuple and type(y[0])==ParamFloat), 'y plotting variable must be a <ParamFloat> or tuple of <ParamFloat>s'
+        if text: assert (type(text)==tuple and len(text)>=3), 'text keyword must have format (x,y,str,{fontsize})'
+
+        PlotLines.nfig += 1  # Increase counter for number of plot instances
+        self.fig_no = PlotLines.nfig  # Set the figure number to the number of this instance
+        self.shown = False
 
         ## Store arguments in self
+        self.fig = None
         self.title = title
         self.x = x
         self.y = tf_array.make_tuple(y) # Always make y a tuple even if it only contains one set of data
+        self.text = [] # text is a list of tuples containing (x,y,str,{fontsize})
+        if text: self.text.append(text) # Text to annotate plot
+        self.subplot = subplot
+        self.block = block
+        self.dir_fig = dir_fig
+        self.fn = fn
+        self.cm = cm
 
         ## Set default mpl properties (font sizes etc)
         tfp.set_mpl_defaults(defaults=defaults)
         plt.ion() # Interactive plotting (draw implicit)
 
         ## Create the figure and axes
-        self.ax, self.fig = tfp.new_axis(subplot)
+        self.ax, self.fig = tfp.new_axis(subplot, fig_no=self.fig_no)
 
         ## Set axis title and labels
         if self.title:
@@ -215,6 +233,9 @@ class Plot(object): # Inherit plt.figure ?
             self.set_xlabel(self.x.label())
         if self.y:
             self.set_ylabel(self.y[0].label()) # set y axis using first y parameter in tuple
+
+        if text:
+            self.set_text()
 
             # self.fig.show()
             # plt.draw()
@@ -232,49 +253,112 @@ class Plot(object): # Inherit plt.figure ?
         assert type(ylabel) == str, 'ylabel must be a string'
         self.ax.set_ylabel(ylabel)
 
-    def text(self, x, y, string, center = False):
+    def set_text(self, text=None, center = False, fontsize = 16):
         """ Add text to plot at given plot coordinates """
-        tfp.text_poss(x, y, string, self.ax, center = False)
+        if text:
+            self.text.append(text) # If called individually store supplied text tuple
+        # print(self.text)
+        if self.text:
+            for t in self.text:
+                if len(t)==4:
+                    fontsize=t[3]
+                else: fontsize=None
+                tfp.text_poss(t[0],t[1],t[2], self.ax, center = False, fontsize=fontsize)
+
+    def add_legend(self, force_legend = False):
+        """ Add legend to plot with default setting (best position, dragable, transparrent etc) """
+        self.force_legend = force_legend
+        if len(self.lines) > 1 or force_legend: # Only show the legend if there is more than one plot
+            tfp.legend_dflt(self.ax)
+
+    def set_strings(self, force_legend=False):
+        self.set_title(self.title)
+        self.set_xlabel(self.x.label())
+        self.set_ylabel(self.y[0].label())
+        # self.add_legend(force_legend=force_legend) # don't want to add legend before lines
 
     def save_fig(self, dir_fig='./Figures/', fn='Figure_tmp', ext='.png', dpi=300, silent=False, create_dir=False):
         """ Save figure as an image """
         tfp.save_fig(self.fig, dir_fig=dir_fig, fn=fn, ext=ext, dpi=dpi, silent=silent, create_dir=create_dir)
 
+    def show(self):
+        if ((not self._internal) and (self.block)):
+            # self.fig.show() # Why does this make figure window non-blocking?
+            plt.show()
+            self.shown=True  # Once the fig has been shown it needs to be redrawn, so record this
+
+            if (self.fn):
+                self.save_fig(create_dir=True, dpi=300)
 
 class PlotLines(Plot):
-    def __init__(self, cm = 'jet', padx = [5, 5], pady = [5, 5], pass_zero=0, force_legend=False, **kwargs):
 
-        self.lines = []
+
+    def __init__(self, cm = 'jet', padx = [0, 0], pady = [0, 0], pass_zero=False, force_legend=False, **kwargs):
+
+        self.lines = [] # List of all lines plotted
 
         super().__init__(**kwargs) # Run __init__ for Plot base class
 
-        self.plot2D() # Plot the data
-        self.update_colours(cm=cm) #
+        self._internal = True # Prevent functions performing blocking actions and saving files after internal chain calls
+
+        self.plot2D(self.x, self.y) # Plot the data
+        self.update_colours(cm=cm) # Set line colours acording to colour map for clarity
         self.update_ranges(padx = padx, pady = pady, pass_zero=pass_zero) # Extend the axes ranges
-        self.add_legend(force_legend=force_legend)
-        self.text(0.1, 0.9, 'Here is some text')
-        self.save_fig(create_dir=True, dpi=300)
-        plt.show()
+        self.add_legend(force_legend=force_legend) # Add legend with good default settings
 
-    def plot2D(self):
+        self._internal = False # Allow functions called separately to perform blocking actions and save files ie call show()
+
+        self.show() # Show the plotting window and save file
+
+    def plot2D(self, x, y, block=True):
         """ Plot the y parameters (stored in a tuple) vs the x parameter """
-
-        for y in self.y: # Loop over y parameters and plot a line for each (a single y param is nested in a tuple)
-            line = self.ax.plot(self.x.value, y.value, label=y.legend())
+        if not self._internal: # If called individually, redraw the plot as was
+            if self.shown: self.draw() # If the plot has already been shown and closed, redraw it
+            self.block = block
+        y = tf_array.make_tuple(y)
+        for l in y: # Loop over y parameters and plot a line for each (a single y param is nested in a tuple)
+            line = self.ax.plot(self.x.value, l.value, label=l.legend())
             self.lines.append(line)
+        if not self._internal:
+            pass
+            self.update_colours(cm=self.cm) # Is this needed here?
+            self.add_legend() # Update legend with new lines when called individually
+        self.show()
+
+    def refresh_lines(self):
+        """ Redraw existing lines stored in self.lines, without appending any new elements
+        """
 
     def update_colours(self, cm='jet'):
+        """ Update line colours to span supplied colour map """
+        self.cm = cm
         tfp.update_colors(self.ax, cm=cm)
 
-    def update_ranges(self, padx = [5, 5], pady = [5, 5], pass_zero=0):
+    def update_ranges(self, padx = [5, 5], pady = [5, 5], pass_zero=False):
         """ Update axis ranges """
-        tfp.axis_range(self.ax, padx = padx, pady = pady, pass_zero=pass_zero)
+        self.padx = padx
+        self.pady = pady
+        self.pass_zero = pass_zero
+        tfp.axis_range(self.ax, padx = padx.copy(), pady = pady.copy(), pass_zero=pass_zero) # send a copy so values in self are not modified (/100)
 
-    def add_legend(self, force_legend = False):
-        """ Add legend to plot with default setting (best position, dragable, transparrent etc)
-        """
-        if len(self.lines) > 1 or force_legend: # Only show the legend if there is more than one plot
-            tfp.legend_dflt(self.ax)
+    def set_plot(self):
+        """ Plot lines, tweek display and show legend etc based on previously stored values"""
+        self.lines = [] # Empty list of all lines plotted so they are not duplicated when replotted
+        self.plot2D(self.x, self.y) # Plot the data
+        self.update_colours(cm=self.cm) # Set line colours acording to colour map for clarity
+        self.update_ranges(padx = self.padx, pady = self.pady, pass_zero = self.pass_zero) # Extend the axes ranges
+        self.add_legend(force_legend=self.force_legend) # Add legend with good default settings
+        self.set_text()
+
+    def draw(self):
+        """ Clear and redraw the figure so it can be shown again """
+        self._internal = True
+        # if self.fig: self.fig.clear() # if the fig is being redrawn, clear it first
+        self.ax, self.fig = tfp.new_axis(self.subplot, fig_no=self.fig_no)
+        self.set_strings()
+        self.set_plot()
+        self.shown = False
+        self._internal = False
 
 
 class Plot3D(Plot):

@@ -22,8 +22,8 @@ import matplotlib as mpl                  # For transforms etc ?
 from matplotlib import transforms   # For transforms etc
 
 # from . import tf_numeric
-import tf_libs.tf_array
-import tf_string
+import tf_libs.tf_array  as tf_array
+import tf_libs.tf_string as tf_string
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -65,7 +65,7 @@ def set_mpl_defaults(defaults=0):
 
 	return
 
-def new_axis(subplot=111):
+def new_axis(subplot=111, fig_no=None):
 	"""
 	Make new plot and reuturn its axes - used for finding axes ranges etc:
 
@@ -73,7 +73,10 @@ def new_axis(subplot=111):
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	"""
-	fig = plt.figure()
+	if fig_no:
+		fig = plt.figure(fig_no)
+	else:
+		fig = plt.figure()
 	ax = fig.add_subplot(subplot)
 	return ax, fig
 
@@ -89,7 +92,7 @@ def vline_label(x, label, ypos=0.8, xoffset=0.01, color = 'k'):
     plt.axvline( x, linestyle='--', color = color)
     plt.text(x+xoffset*xran, ypos, label, transform=transy, color = color )
 
-def text_poss( x, y, string, ax, center = False ):
+def text_poss( x, y, string, ax, center = False, fontsize = 18 ):
 	""" Given a string, an axis, and fractional axis coordinates, plot text 
 	at those coordiantes (eg 20% from left, 20% from bottom)  
 	ie will plot text string at:
@@ -105,13 +108,17 @@ def text_poss( x, y, string, ax, center = False ):
         NONE. (plots text) 
 	"""
 
+	if fontsize==None: fontsize=18
+
 	if center == True:
 		plt.text( x, y, string, 
 				horizontalalignment='center', verticalalignment='center',
-				transform=ax.transAxes)
+				transform=ax.transAxes, fontsize=fontsize)
 	else:
-		plt.text( x, y, string, 
-				transform=ax.transAxes)
+		text = plt.text( x, y, string,
+				transform=ax.transAxes, fontsize=fontsize)
+		# text.draggable()
+
 	## Get axis limits
 	# ax_limits = ax.axis()
 	# x_data = tf_num.frac_range( ax_limits[0:2], x )
@@ -233,6 +240,9 @@ def save_fig(fig, dir_fig='./Figures/', fn='Figure_tmp', ext='.png', dpi=300, si
 
 	return
 
+def replot():
+	""" Clear replot the figure with all it saved settings """
+	pass
 
 if __name__ == "__main__":
 	print("axis_range([0,1,2,3,10])")

@@ -215,24 +215,6 @@ def strnsignif(x, nsf=3, scientific=False, _verbatim=False, standard_form=False)
     elif _char_before_dp(x) >= nsf: # important if %s used above
         strn = strn.split(sep='.')[0]
 
-    # ## %f always gives at least 6dp of precision therefore remove false zeros
-    # if '.' in strn:
-    #     char_after_dp = len(strn.split(sep='.')[1])
-    #
-    #     # db(strn=strn)
-    #     # db(_char_before_dp=_char_before_dp(x))
-    #     # db(char_after_dp=char_after_dp)
-    #     # db(_lead_zeros_after_dp=_lead_zeros_after_dp(x))
-    #
-    #     extra_zeros = _char_before_dp(x)+char_after_dp - _lead_zeros_after_dp(x) - nsf
-    #     # assert extra_zeros >= - _lead_zeros_after_dp(x) 'Displaying too few significant figures...!'
-    #
-    #     if extra_zeros==0:
-    #         ## Can't find way to numerically index final element in range equiv to [0:]
-    #         strn = strn.split(sep='.')[0]+'.'+ strn.split(sep='.')[1][0:]
-    #     elif extra_zeros > 0:
-    #         strn = strn.split(sep='.')[0]+'.'+ strn.split(sep='.')[1][0:-1-(extra_zeros-1)]
-
     ## Add -ve sign if removed
     if x<0: strn = '-'+strn
     if standard_form: strn += exponent
@@ -240,7 +222,7 @@ def strnsignif(x, nsf=3, scientific=False, _verbatim=False, standard_form=False)
     return strn
 
 
-def str_err(value, error, nsf = 1, max_lead_zero = 1, latex=False, separate=False):
+def str_err(value, error, nsf = 1, max_lead_zero = 6, latex=False, separate=False):
     """ Given a value and error, finds the position of the first sifnificant
         digit of the error and returns a string contianing both value and
         error to the same number of sifnificant digits separated by a +/-
@@ -272,7 +254,8 @@ def str_err(value, error, nsf = 1, max_lead_zero = 1, latex=False, separate=Fals
         pm = r" $\pm$ "
     else:  # for  single string containing +/-
         pm = r" +/- "
-        
+
+    ## If displaying in normal form requires too many digits (zeros after dp) use exponential format
     if (_lead_zeros_after_dp(error) < max_lead_zero) or separate:
         value_str = strnsignif(value, nsf_val)
         err_str = strnsignif(error, nsf)
@@ -290,7 +273,7 @@ def str_err(value, error, nsf = 1, max_lead_zero = 1, latex=False, separate=Fals
         return str_exp
 
 
-def str_err_old(value, error, nsf = 1, latex=False, separate=False):
+def _str_err_old(value, error, nsf = 1, latex=False, separate=False):
 	""" Given a value and error, finds the position of the first sifnificant 
 		digit of the error and returns a string contianing both value and
 		error to the same number of sifnificant digits separated by a +/-
@@ -444,8 +427,6 @@ def comb_str(*args, **kwargs):
         comb_str += scs(str1, str2=str2, append=True, separator=separator)            
     return comb_str
 
-
-
 def sort_dates(dates_in, format = "%Y-%m-%d", reverse = True):
     """Sort dates chronologically
     Note: This will add padded zeros if they are nor already present therefore output not always equal to input
@@ -476,7 +457,6 @@ def str_name_value(names, values, errors=None, dp=1):
 
     return str_out
 
-
 def str_moment(arr, ax=None, xy=(0.04, 0.7)):
     """ Return string containing statistical information about the contents of arr
     ax: matplotlib axis to annotate stats to """
@@ -497,6 +477,23 @@ def str_moment(arr, ax=None, xy=(0.04, 0.7)):
         plt.annotate(stats_str, xy=xy, xycoords='axes fraction', family='monospace', bbox=dict(boxstyle="round", alpha= 0.5, fc="0.8"))
 
     return stats_str
+
+def str_replace(string, pattern, replacement='', unique=True):
+    """ Find occurenceof pattern in string and replace with preplacement """
+    pat = re.compile(pattern)
+    m = pat.match(string)
+    print(m.expand())
+
+    ## Check how many times pattern was found
+    if m == None:
+        print('No matches for %s in %s' % (pattern, string))
+    if len(m.groups()) > 1:
+        print('Multiple (%d) matches for %s in %s' % (len(m.groups), pattern, string))
+
+    re.s
+
+    strn = m.group(1)
+
 
 def test_print():
 	print("Here is a string")
