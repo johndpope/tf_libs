@@ -8,6 +8,7 @@ Notes:
     @bug:
 
 Todo:
+    @todo: update tf.axis_range to use axis DATA limits
     @todo:
 
 Info:
@@ -154,6 +155,8 @@ def axis_range(ax, padx = [5,5], pady = [5,5], **kwargs):
 	Default to extend x and y ranges by 5%
 	Set pass_zero = True, to allow range to cross origin
 	"""
+
+	## ********* Rather than axis limits need to get axis DATA limits incase new data plotted! *************************
 	x_range = ax.get_xlim()
 	y_range = ax.get_ylim()
 

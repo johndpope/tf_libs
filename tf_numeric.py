@@ -14,6 +14,9 @@ Info:
     @since: 18/09/2015
 """
 
+## CAN import: tf_debug
+## CANNOT import: tf_array, tf_string
+
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
 __credits__ = []

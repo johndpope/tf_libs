@@ -61,20 +61,20 @@ class debug: # Make upper case!
     def __call__(self, *args, **kwargs):
         """ Perform a debug print (or plot if requested) """
         ## Extract specific keywords
-        plot = kwargs.pop('plot', False)
+        plot = kwargs.pop('PLOT', False)
         force = kwargs.pop('FORCE', False) ## Force this call to print even if instance turned off
 
         self.line = inspect.currentframe().f_back.f_lineno
 
         if not plot: # Normal debug print opperation
             # debug_print(1, debug_ON=self.debug_ON)
-            if self.debug_ON or force:
+            if self.debug_ON or force or debug.debug_ON_class:
                 if self.lines_ON or force:
                     print(module_name(level=1)+', '+line_no(level=1)+': ', end=' ')
                 debug_print(self.debug_ON, *args, **kwargs)
                 debug.ndebug_ON += 1
                 debug.lines[self.line] = True
-            else: 
+            else:
                 debug.nOFF += 1
                 debug.lines[self.line] = False
         else: # debug_plot
@@ -95,6 +95,20 @@ class debug: # Make upper case!
 
     def count(self):
         print("line {}: {} <debug> debug_ON, {} debug OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
+
+    def whereami(self, level=1):
+        print(whereami(level=level))
+
+    def trace_back(self, level=1):
+        print(traceback(level=level))
+
+    def force_all(self, on=True):
+        if on:
+            debug.debug_ON_class = True
+        else:
+            debug.debug_ON_class = False
+
+
 
     def info(self):
         print("line {}: {} <debug> ON, {} <debug>: OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
@@ -142,9 +156,20 @@ def line_no(level=0):
     return line
 
 def whereami(level=0):
+    """ Return a string detailing the line number, function name and filename from level relative to where this
+    function was called """
+
     # string = module_name(level=level+1)+', '+func_name(level=level+1)+', '+line_no(level=level+1)+': '
     string = line_no(level=level+1)+', '+func_name(level=level+1)+', '+module_name(level=level+1)+':\t'
     return string
+
+def traceback(level=0):
+    """ Return string listing the full fraceback at the level relative to where this function was called """
+    string = 'Traceback:\n'
+    while not (func_name(level=level) == '<module>'):
+        string += line_no(level=level+1)+', '+func_name(level=level+1)+', '+module_name(level=level+1)+'\n'
+        level += 1
+    return string.rstrip()
 
 def debug_print( debug, *args, **kwargs ):
     """

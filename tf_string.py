@@ -26,7 +26,7 @@ import re
 ## CANNOT import:
 # from tf_libs import tf_array
 import tf_libs.tf_array as tf_array
-# from . import tf_debug
+from tf_libs.tf_debug import debug
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -35,7 +35,8 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
-# db = tf_debug.debug(debug_ON=0, lines_ON = False, plot_ON=False)
+db = debug(debug_ON=1, lines_ON = 1, plot_ON=False)
+db.force_all(on=1)
 
 def to_precision(x,p):
     """ Return a string representation of x formatted with a precision of p
@@ -379,11 +380,9 @@ def str_popt(popt, pcov, check=[0,1,2], strings=None,
 		units = list(repeat('', len(check)))
 	if strings == None:
 		strings = ['popt['+str(i)+']' for i in check]
-	nl = list(repeat('\n', len(check)-1)) + ['']
+	nl = list(repeat('\n', len(check)-1)) + [''] # new lines
 	string = ''
 	for i in check:
-		print("i=",i)
-		#print strings, popt, units, nl
 		string += (strings[i] + '\t = ' + str_err(popt[i], np.sqrt(pcov[i][i]), latex=latex) + ' ' +
 			units[i] + nl[i])
 	return string
@@ -394,7 +393,7 @@ def scs(str1, str2=False, append = False, separator='/'):
     if not already pressent.  
     -If both str1 and str2 supplied, the two strings are concatenated such that 
     they are separated by one separator characher (default:'/')
-    *If append is true only the second argement (str2) is returned w or w/o the
+    *If append is true only the second argument (str2) is returned w or w/o the
     required separator """
     # print str1, str2
     if str2: # combine two path strings
@@ -407,7 +406,7 @@ def scs(str1, str2=False, append = False, separator='/'):
             if append: return separator+str2
             else:      return str1+separator+str2
         elif end and start: # remove slash between path elements
-            if append: return str2[1:]
+            if append: return str2 #[1:]
             else:      return str1+str2[1:]
         else: # Either begining or end already has a slash
             if append: return str2
@@ -421,10 +420,12 @@ def scs(str1, str2=False, append = False, separator='/'):
         
 def comb_str(*args, **kwargs):
     """ Combine strings into one string, each element separated by separator character (dflt:'/') """
-    separator = kwargs.pop("separator", '/')
+    separator = kwargs.pop("separator", '/') # Need to pop to prevent separator becoming a positional argument!
+    assert(len(args)>1 and type(args[0])==str, 'comb_str requires at least two string arguements')
     comb_str = args[0]
     for str1, str2 in zip(args, args[1:]): # create tuples of adjacent strings
-        comb_str += scs(str1, str2=str2, append=True, separator=separator)            
+        # db(str1=str1, str2=str2)
+        comb_str += scs(str1, str2=str2, append=True, separator=separator)
     return comb_str
 
 def sort_dates(dates_in, format = "%Y-%m-%d", reverse = True):
@@ -437,7 +438,73 @@ def sort_dates(dates_in, format = "%Y-%m-%d", reverse = True):
     sorted = [datetime.datetime.strftime(d, format) for d in dates]
     return sorted, indices
 
-def str_name_value(names, values, errors=None, dp=1):
+
+def str_cols(*args, **kwargs):
+    """ Return string containing properly aligned columns of strings. Each supplied list becomes a column in the
+    output string
+    kwargs:
+    sep:    str/tuple     separator between each column
+    """
+    sep = kwargs.pop("sep", ' ') # Need to pop to prevent becoming a positional argument!
+    append = kwargs.pop("append", '') # Need to pop to prevent becoming a positional argument!
+
+    if len(args) == 1:
+        assert [type(a) == True for a in args], "Cannot combine non strings"
+        return '\n'.join(args[0])
+
+    if isinstance(sep, (tuple,list)) and (len(sep) == len(args)-1): # list of column specific separators
+        sep_out = sep[1:]
+        sep = sep[0]
+    elif type(sep) == str: # if only one sepatator supplied use it between each columns
+        sep_out = sep
+    else:
+        raise('sep must be a string or a tuple of strings')
+
+    if type(append) == str: # use the same appendor for all but last column
+        append = list(repeat(append,len(args)-1))
+        append.append('')
+        db(app=append, rep=repeat(append,len(args)-2))
+        app1 = append[0]
+        app2 = append[1]
+        append = append[2:]
+        db(append=append, args=args)
+    elif isinstance(append, (tuple,list)) and (len(append) == len(args)-0): # individual appendors supplied for each
+        # column
+        app1 = append[0]
+        app2 = append[1]
+        append = append[2:]
+    elif isinstance(append, (tuple,list)) and (len(append) == len(args)-1): # nested call - 1st col already appended
+        app1 = ''
+        app2 = append[0]
+        append = append[1:]
+    else:
+        db(append=append, args=args)
+        raise('append must be a string or a tuple of strings')
+
+    # extract first two args - these two colums will first be combined into one column string
+    list1 = args[0] # can't use pop as tuple immutable
+    list2 = args[1]
+    args = args[2:] # Remove them from args for next pass
+
+    assert len(list1) == len(list2), "inconsistent number of strings in list1 and list2"
+
+    width1 = np.max([len(s) for s in list1])+len(app1) # length of longest first string
+    width2 = np.max([len(s) for s in list2])+len(app2)
+    list1_out = []
+    list2_out = []
+    str_out = []
+    for s1, s2 in zip(list1, list2):
+        # str_out += '{2:{0}}{3:{1}}\n'.format(width1, width2, name+sep, value)
+        s1 = '{1:{0}}'.format(width1, s1+app1)
+        s2 = '{1:{0}}'.format(width2, s2+app2)
+        list1_out.append(s1)
+        list2_out.append(s2)
+        str_out.append( sep.join([s1, s2]) )
+
+    return str_cols(str_out, sep = sep_out, append = append, *args)
+
+
+def str_name_value(names, values, errors=None, dp=1, sep=':'):
     """ Return string containing properly formatted names and their values
     Makes sure that decimal points line up in values
     eg
@@ -446,13 +513,11 @@ def str_name_value(names, values, errors=None, dp=1):
     ^      ^     ^ lined up using as little horizontal space as possible (better than tabs)
     """
     assert len(names) == len(values), "inconsistent number of name strings and values"
-    pad1 = np.max([len(s) for s in names])+2 # length of longest name
-    pad2 = str(int(np.floor(np.log10(np.max(values))))+3) # pad spaces
-    # fmt_str = 'Mean:\t{:'+pad+'.1f}\nMode: \nMin:\t{:'+pad+'.1f}\nMax:\t{:'+pad+'.1f}\nRange:\t{:'+pad+'.1f}\nStd dev:{:'+pad+'.1f}'.expandtabs()
-    # print(fmt_str)
+    pad1 = np.max([len(s) for s in names])+1+len(sep) # length of longest name
+    pad2 = str(int(np.floor(np.log10(np.max(values))))+3) # pad spaces before dp to align dp
     str_out = ''
     for name, value in zip(names, values):
-        str_out += '{2:{0}}{3:{1}.1f}\n'.format(pad1, pad2, name+':', value)
+        str_out += '{2:{0}}{3:{1}.1f}\n'.format(pad1, pad2, name+sep, value)
     str_out = str_out.rstrip()
 
     return str_out
@@ -504,7 +569,8 @@ if __name__ == "__main__":
     y = np.linspace(10,30,100)
 
     a = [1,2,3]
-    str_popt(a,a)
+    b = [a,a,a]
+    print(str_popt(a,b))
 
 
     pass

@@ -8,6 +8,7 @@ Notes:
     @bug:
 
 Todo:
+    @todo: update tf.axis_range to use axis DATA limits
     @todo: Use param module
     @todo: Use scipy units
 
@@ -174,6 +175,16 @@ class ParamFloat(np.ndarray):
         #print help(self[:])
         # return self.name+' = '+repr(self[:])+' '+self.unit
         return self.name+': '+np.ndarray.__str__(self) +' '+self.unit
+
+    def __eq__(self, other):
+        """ two seperate instances with identical atributes will evaluate as the same. Handles inhertiance correctly.
+        """
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     # def __call__(self):
     #     " Value of float parameter "
@@ -433,6 +444,7 @@ class PlotLines(Plot):
         self.padx = padx
         self.pady = pady
         self.pass_zero = pass_zero
+        ## Need to update axis_range to use axis DATA limits
         tfp.axis_range(self.ax, padx = padx.copy(), pady = pady.copy(), pass_zero=pass_zero) # send a copy so values in self are not modified (/100)
 
     def set_plot(self):

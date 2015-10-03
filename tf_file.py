@@ -9,6 +9,10 @@ Notes:
 
 Todo:
     @todo: find_latest_file function using sort_dates()
+    @todo: add compatibility for non raw string file paths
+    @todo: add recursive functionality to fn_filter
+
+
 
 Info:
     @since: 17-06-14
@@ -24,6 +28,8 @@ import re
 ## CAN import:    tf_debug, tf_array
 ## CANNOT import: tf_class
 # from . import tf_numeric
+import tf_libs.tf_string as tf_string
+from tf_libs.tf_string import comb_str
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -49,7 +55,7 @@ def mkdir(dirs, verbatim = False):
 			if verbatim:
 				print('Directory "'+dir+'" already exists')
 
-def fn_filter(dir, pattern, unique=False):
+def fn_filter(dir, pattern, recursive = False, unique=False):
     """ Filenames in a given directory that match the search pattern
     TODO: add compatibility for non raw string file paths
     """
@@ -59,13 +65,46 @@ def fn_filter(dir, pattern, unique=False):
     for fn in fns:
         if p.search(fn):
             matches.append(fn)
+    if matches == []:
+        print('No files match the supplied pattern: "%s"' % pattern)
     if unique: # expect unique match so return scalar string that matches
         if len(matches) == 1:
             return matches[0]
         else:
-            print('WARNING: fn_filter: {} matches: {}'.format(len(matches), matches))
+            raise('WARNING: fn_filter(unique=True): {} matches: {}'.format(len(matches), matches))
     else:
         return matches
+
+def batch_rename(directory, pattern, rep_str, recursive=False, user_confirm = False, dir_rename=False):
+	""" For all files in directory containing re pattern, replace pattern with rep_str
+	@todo: update to not rename directories!"""
+	## Get list of all files in directory containing pattern
+	fn_matches = fn_filter(directory, pattern, recursive=recursive)
+	if fn_matches == []:
+		print('No files were renamed.')
+		return
+	p = re.compile(pattern)
+	print(os.path.abspath(directory+'/file1.txt'))
+	fn_new = []
+	n=0
+	for fn in fn_matches:
+		fn_new.append( p.sub(rep_str, fn) )
+		n += 1
+	if user_confirm:
+		print('The following %d files will be renamed in: "%s":' % (n, directory))
+	if user_confirm:
+		print(tf_string.str_cols(fn_matches,fn_new, sep=' --> '))
+		choice = input('Rename %d file(s)? [y/n]: ' % n)
+		if not choice == 'y':
+			print('No files were renamed')
+			return ## return from function without renaming
+	for fn_old, fn_repl in zip(fn_matches, fn_new):
+		old = os.path.abspath(comb_str(directory,fn_old))
+		new = os.path.abspath(comb_str(directory,fn_repl))
+		os.rename(old, new)
+	print("Renamed %d files in %s: '%s' --> '%s'" % (n, directory, pattern, rep_str))
+
+	return fn_new
 
 def ncol(fn_list, cols, dir='', filekey=False, np_arrays = False, header_len = 0, debug = False):
 	"""
