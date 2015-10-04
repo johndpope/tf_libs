@@ -5,7 +5,7 @@
 Detailed description:
 
 Notes:
-    self.debug_ON is the value for the instance, debug.debug_ON
+    self.debug_ON is the value for the instance, Debug.debug_ON
     @bug:
 
 Todo:
@@ -31,7 +31,7 @@ __status__ = "Development"
 __version__ = "1.0.1"
 
 
-class debug: # Make upper case!
+class Debug: # Make upper case!
     """ Debugging features """
     debug_ON_class = False
     plot_ON_class = False
@@ -45,10 +45,10 @@ class debug: # Make upper case!
 
     def __init__(self, debug_ON=False, lines_ON = False, plot_ON=True):
         self.line = inspect.currentframe().f_back.f_lineno
-        ## First time debug class is initiated print location if debug ON
-        if (not debug.init) and debug_ON:
-            print(whereami(level=1)+'tf_libs <debug> instance created')#.format(self.line)
-            debug.init = True
+        ## First time Debug class is initiated print location if Debug ON
+        if (not Debug.init) and debug_ON:
+            print(whereami(level=1)+'tf_libs <Debug> instance created')#.format(self.line)
+            Debug.init = True
         self.debug_ON = debug_ON
         self.lines_ON = lines_ON
         self.plot_ON = plot_ON
@@ -59,34 +59,34 @@ class debug: # Make upper case!
 
 
     def __call__(self, *args, **kwargs):
-        """ Perform a debug print (or plot if requested) """
+        """ Perform a Debug print (or plot if requested) """
         ## Extract specific keywords
         plot = kwargs.pop('PLOT', False)
         force = kwargs.pop('FORCE', False) ## Force this call to print even if instance turned off
 
         self.line = inspect.currentframe().f_back.f_lineno
 
-        if not plot: # Normal debug print opperation
+        if not plot: # Normal Debug print opperation
             # debug_print(1, debug_ON=self.debug_ON)
-            if self.debug_ON or force or debug.debug_ON_class:
+            if self.debug_ON or force or Debug.debug_ON_class:
                 if self.lines_ON or force:
                     print(module_name(level=1)+', '+line_no(level=1)+': ', end=' ')
                 debug_print(self.debug_ON, *args, **kwargs)
-                debug.ndebug_ON += 1
-                debug.lines[self.line] = True
+                Debug.ndebug_ON += 1
+                Debug.lines[self.line] = True
             else:
-                debug.nOFF += 1
-                debug.lines[self.line] = False
+                Debug.nOFF += 1
+                Debug.lines[self.line] = False
         else: # debug_plot
-            if debug.plot_ON:
+            if Debug.plot_ON:
                 debug_plot(*args, **kwargs) 
 
     def on(self):
-        debug.debug_ON = True
+        Debug.debug_ON = True
         print('Debugging (tf_libs): \tdebug_ON')  
 
     def off(self):
-        debug.debug_ON = False
+        Debug.debug_ON = False
         print('Debugging (tf_libs): \tOFF')
 
     def l(self):
@@ -94,7 +94,7 @@ class debug: # Make upper case!
         print('(line: {}) {}'.format(line, text))
 
     def count(self):
-        print("line {}: {} <debug> debug_ON, {} debug OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
+        print("line {}: {} <Debug> debug_ON, {} Debug OFF".format(self.line, Debug.ndebug_ON, Debug.nOFF))
 
     def whereami(self, level=1):
         print(whereami(level=level))
@@ -104,19 +104,19 @@ class debug: # Make upper case!
 
     def force_all(self, on=True):
         if on:
-            debug.debug_ON_class = True
+            Debug.debug_ON_class = True
         else:
-            debug.debug_ON_class = False
+            Debug.debug_ON_class = False
 
 
 
     def info(self):
-        print("line {}: {} <debug> ON, {} <debug>: OFF".format(self.line, debug.ndebug_ON, debug.nOFF))
+        print("line {}: {} <Debug> ON, {} <Debug>: OFF".format(self.line, Debug.ndebug_ON, Debug.nOFF))
         for line, debug_ON in self.lines.items():
             print(' ', line, debug_ON, ((debug_ON and ' <--') or ''))
         
 def get_verbose_prefix():
-    """Returns an informative prefix for verbose debug output messages"""
+    """Returns an informative prefix for verbose Debug output messages"""
     s = inspect.stack()
     module_name = inspect.getmodulename(s[1][1])
     func_name = s[1][3]
@@ -182,7 +182,7 @@ def debug_print( debug, *args, **kwargs ):
      aldebug_ONgside the keyword names.
     
     Inputs:
-     debug      bool	toggle debug mode debug_ON and off
+     Debug      bool	toggle Debug mode debug_ON and off
      *args      any     variables to print
      **kwargs   any     variables to print with names
      
@@ -191,7 +191,7 @@ def debug_print( debug, *args, **kwargs ):
 
     Call examples: 
      debug_print(1, var1, var2, var3)
-     debug_print(debug, var1 = var1, var2 = var2, var3 = var3)
+     debug_print(Debug, var1 = var1, var2 = var2, var3 = var3)
     """
     ## TODO: Use pprint.pformat
     if debug:
@@ -215,7 +215,7 @@ def debug_plot(*args, **kwargs):
     xlabel = kwargs.pop('xlabel', 'x')
     ylabel = kwargs.pop('ylabel', 'y')
 
-    # print 'debug plot on line {}'.format(line_no(level))
+    # print 'Debug plot on line {}'.format(line_no(level))
 
     if len(args) == 1: # and len(kwargs) == 0:
         x = np.arange(len(args[0]))
@@ -261,7 +261,7 @@ def demo_print(command, info=""):
 
 def debug_demo():
     print('*** tf_debug.py demo ***')
-    db = debug(1,1,1)
+    db = Debug(1,1,1)
 
     x = np.linspace(0,10,100)
     y = np.linspace(10,30,100)

@@ -8,26 +8,28 @@ Notes:
     @bug:
 
 Todo:
+    @todo: update gaussian formula
     @todo:
 
 Info:
     @since: 18/09/2015
 """
 
+import numpy as np
+## CAN import:    Debug, simple
+## CANNOT import:
+import tf_libs.tf_simple as tf_simple
 import tf_libs.tf_debug as tf_debug
 import tf_libs.tf_string as tf_string
 
+__version__ = "1.0.1"
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
 __credits__ = []
 __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
-__version__ = "1.0.1"
 
-## CAN import:    debug
-## CANNOT import:
-
-db = tf_debug.debug(1,0,0)
+db = tf_debug.Debug(1,1,0)
 
 """ Physical constants: 
 ## Physical constants
@@ -62,29 +64,60 @@ M_Ar = 39.948           # Atomic mass of atomic/molecular Argon [amu]
 
 
 ## Functions
-def poly(x, *args, str_eqn=False):
+def poly1(x, coefs, str_eqn = False):
     """ Polynomial function of order len(args)-1
     Return: arg1 + arg2 x + arg3 x^2 + arg4 x^3 + ..."""
-    if not args:
-        raise('poly requires at least one arguement')
+
+    # str_eqn=kwargs.pop('str_eqn', False)
+
+    # if not args:
+    #     raise('poly requires at least one arguement')
 
     # db(args=args)
     sum = 0
     pow = 0
     eqn = []
-    for arg in args:
-        sum += arg * x**pow
-        if str_eqn: eqn.insert(0,'{}x^{}'.format(arg,pow))
-    ## Need to rejoin string segments here
+    for pow, coef in enumerate(tf_simple.make_iter(coefs)[::-1]):
+        sum += coef * x**pow
+        if str_eqn:
+            if coef == 0: # Don't add 0x^2 to the string etc
+                pass
+            elif pow > 1:
+                eqn.insert(0,'{:0.3g}x^{}'.format(coef,pow))
+            elif pow == 1:
+                eqn.insert(0,'{:0.3g}x'.format(coef))
+            else:
+                eqn.insert(0,'{:0.3g}'.format(coef)) # no x^0 for constant
+    str_eqn = '' + ' + '.join(eqn) # join x terms separated by +s
 
-    ##
+    if not str_eqn:
+        return sum # just numerical output
+    else:
+        return sum, str_eqn
 
-    return sum
+def exp1(x, a, m, c, str_eqn=False):
+    """ y = a * e^( m ) + c where exp, a and c can all be polynomials in x """
 
-def exp(*args):
-    pass
+    val_a, str_a = poly1(x, a, str_eqn=True)
+    val_m, str_m = poly1(x, m, str_eqn=True)
+    val_c, str_c = poly1(x, c, str_eqn=True)
+    val = val_a * np.exp(val_m) + val_c
 
+    if not str_eqn:
+        return val
+    else:
 
+        if not ('x' in str_a):
+            str_eqn = str_a + 'exp(' + str_m + ') + ' +str_c
+        else:
+            str_eqn = '(' + str_a + ')exp(' + str_m + ') + ' + str_c
+
+        return val, str_eqn
+
+def gauss1(x, A, mu, sigma, str_eqn=False):
+    """ Gaussian distribution with centre mu and width sigma """
+    ## @todo: update gaussian formula
+    return exp1(x, A, (1/(2*sigma),0,-mu/(2*sigma)), 0, str_eqn=str_eqn)
 
 if __name__ == "__main__":
     print("e = ", e)

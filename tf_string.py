@@ -26,7 +26,7 @@ import re
 ## CANNOT import:
 # from tf_libs import tf_array
 import tf_libs.tf_array as tf_array
-from tf_libs.tf_debug import debug
+from tf_libs.tf_debug import Debug
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"
@@ -35,7 +35,7 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
-db = debug(debug_ON=1, lines_ON = 1, plot_ON=False)
+db = Debug(debug_ON=1, lines_ON = 1, plot_ON=False)
 db.force_all(on=1)
 
 def to_precision(x,p):
@@ -421,7 +421,7 @@ def scs(str1, str2=False, append = False, separator='/'):
 def comb_str(*args, **kwargs):
     """ Combine strings into one string, each element separated by separator character (dflt:'/') """
     separator = kwargs.pop("separator", '/') # Need to pop to prevent separator becoming a positional argument!
-    assert(len(args)>1 and type(args[0])==str, 'comb_str requires at least two string arguements')
+    assert (len(args)>1 and type(args[0])==str), 'comb_str requires at least two string arguements'
     comb_str = args[0]
     for str1, str2 in zip(args, args[1:]): # create tuples of adjacent strings
         # db(str1=str1, str2=str2)

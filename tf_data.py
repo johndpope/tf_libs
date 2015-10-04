@@ -29,7 +29,7 @@ from pprint import pprint   # Pretty printing
 # from tf_libs.tf_debug import debug_print as dprint
 
 from . import tf_debug
-db = tf_debug.debug(0,1,1)
+db = tf_debug.Debug(0,1,1)
 
 __author__ = 'Tom Farley'
 __copyright__ = "Copyright 2015, TF Library Project"

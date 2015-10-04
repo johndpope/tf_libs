@@ -24,6 +24,7 @@ from matplotlib import transforms   # For transforms etc
 
 # from . import tf_numeric
 import tf_libs.tf_array  as tf_array
+import tf_libs.tf_simple as tf_simple
 import tf_libs.tf_string as tf_string
 
 __author__ = 'Tom Farley'
@@ -218,7 +219,7 @@ def arr_hist(arr, nbins='auto', av_per_bin=40):
     # plt.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
 
     x = (0.04, 0.8)
-    for i, subarr in enumerate(tf_array.make_tuple(arr)):
+    for i, subarr in enumerate(tf_simple.make_iter(arr)):
         tf_string.str_moment(subarr, ax = ax, xy=(x[i],0.7))
 
     plt.show()
@@ -228,7 +229,7 @@ def save_fig(fig, dir_fig='./Figures/', fn='Figure_tmp', ext='.png', dpi=300, si
 	""" Save figure as image """
 	## If directory does not exist, create it if required
 	if not create_dir:
-		assert(os.path.isdir(dir_fig),'Path %s does not exist.')
+		assert (os.path.isdir(dir_fig)), 'Path %s does not exist.'
 	elif not os.path.isdir(dir_fig):
 		os.makedirs(dir_fig)
 

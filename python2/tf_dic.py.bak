@@ -39,13 +39,13 @@ def key_contains( dict, *args ):
         for key, value in dict.iteritems():     ## Loop through keys in main dictionary
             dprint(debug, '')
             dprint(debug, 'Checking whether "{}"" should be kept'.format(key))
-            # dprint( debug, key=key)#, value=value )
+            # dprint( Debug, key=key)#, value=value )
             nested_dict = dict
         
             for i, (key_nest, value_nest) in enumerate(nested_dict.iteritems()):    ## Loop through nested dictionary to compare with current argument
-                # dprint(debug, 'Searching for keys containing "{}" in: {}'.format(arg, nested_dict.keys()))
+                # dprint(Debug, 'Searching for keys containing "{}" in: {}'.format(arg, nested_dict.keys()))
                 dprint(debug, 'Does "{}" contain "{}"? '.format( key_nest, arg) )
-                # dprint( debug, key_nest=key_nest)#, value_nest=value_nest )
+                # dprint( Debug, key_nest=key_nest)#, value_nest=value_nest )
                 if arg in key_nest:
                     # if i!=len(args)-1:
                     dprint(debug, 'Yes!')
@@ -73,26 +73,26 @@ def key_contains( dict, *args ):
 #     else:
 #         subdict = {}
 #         for key, value in dict.iteritems():     ## Loop through keys in main dictionary
-#             dprint(debug, '')
-#             dprint(debug, 'Checking whether "{}"" should be kept'.format(key))
-#             # dprint( debug, key=key)#, value=value )
+#             dprint(Debug, '')
+#             dprint(Debug, 'Checking whether "{}"" should be kept'.format(key))
+#             # dprint( Debug, key=key)#, value=value )
 #             nested_dict = dict
 #             for i, arg in enumerate(args):      ## Loop through arguments to check at each nested dictionary
-#                 # dprint( debug, arg=arg )
+#                 # dprint( Debug, arg=arg )
 #                 for key_nest, value_nest in nested_dict.iteritems():    ## Loop through nested dictionary to compare with current argument
-#                     # dprint(debug, 'Searching for keys containing "{}" in: {}'.format(arg, nested_dict.keys()))
-#                     dprint(debug, 'Does "{}" contain "{}"? '.format( key_nest, arg) )
-#                     # dprint( debug, key_nest=key_nest)#, value_nest=value_nest )
+#                     # dprint(Debug, 'Searching for keys containing "{}" in: {}'.format(arg, nested_dict.keys()))
+#                     dprint(Debug, 'Does "{}" contain "{}"? '.format( key_nest, arg) )
+#                     # dprint( Debug, key_nest=key_nest)#, value_nest=value_nest )
 #                     if arg in key_nest:
 #                         # if i!=len(args)-1:
-#                         dprint(debug, 'Yes!')
+#                         dprint(Debug, 'Yes!')
 #                         nested_dict = nested_dict[key]
 #                         add = 1
-#                         dprint( debug, add=add )
+#                         dprint( Debug, add=add )
 #                     else:
-#                         dprint(debug, 'No')
+#                         dprint(Debug, 'No')
 #                         add = 0
-#                         dprint( debug, add=add )
+#                         dprint( Debug, add=add )
 #                         break
 #                 if add == 0:
 #                     break

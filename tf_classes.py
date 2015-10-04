@@ -34,6 +34,7 @@ from pprint import pprint  # Pretty printing
 
 ## CAN import:    all tf_* files
 ## CANNOT import: None
+import tf_libs.tf_simple as tf_simple
 import tf_libs.tf_array as tf_array
 import tf_libs.tf_plot as tfp
 import tf_libs.tf_debug as tf_debug
@@ -45,7 +46,7 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
-db = tf_debug.debug(1,0,0)
+db = tf_debug.Debug(1,0,0)
 
 class PhysQuant(object):
     def __init__(self, name, symbol, unit):
@@ -311,7 +312,7 @@ class Plot(object): # Inherit plt.figure ?
         self.fig = None
         self.title = title
         self.x = x
-        self.y = tf_array.make_tuple(y) # Always make y a tuple even if it only contains one set of data
+        self.y = tf_simple.make_iter(y) # Always make y a tuple even if it only contains one set of data
         self.text = [] # text is a list of tuples containing (x,y,str,{fontsize})
         if text: self.text.append(text) # Text to annotate plot
         self.subplot = subplot
@@ -416,7 +417,7 @@ class PlotLines(Plot):
         if not self._internal: # If called individually, redraw the plot as was
             if self.shown: self.draw() # If the plot has already been shown and closed, redraw it
             self.block = block
-        y = tf_array.make_tuple(y)
+        y = tf_simple.make_iter(y)
         for l in y: # Loop over y parameters and plot a line for each (a single y param is nested in a tuple)
             line = self.ax.plot(self.x, l, label=l.legend())
             self.lines.append(line)

@@ -30,14 +30,14 @@ from pprint import pprint   # Pretty printing
 
 ## CAN import: tf_debug
 ## CANNOT import: tf_string
-from tf_libs.tf_debug import debug
+from tf_libs.tf_debug import Debug
 import tf_libs.tf_numeric as tf_numeric
 # from . import tf_debug.debug_print as dprint
 # from . import tf_debug
 # from . import tf_string
 # import tf_string
 
-db = debug(1,1,0)
+db = Debug(1,1,0)
 
 def argsort(seq, reverse=False):
     """ Return indices of sorted (assernding) list """
@@ -196,13 +196,6 @@ def safe_len(var):
         return len(var)
 
 
-def make_tuple(obj):
-    """ In order to itterate over an object which may be a single item or a tuple of items nest a single item in a
-    tuple """
-    if type(obj) == tuple:
-        return obj
-    else:
-        return (obj,)
 
 def tup0(obj):
     """ If obj is a tuple return its first element, else return obj unchanged """
