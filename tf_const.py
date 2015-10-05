@@ -28,6 +28,7 @@ __copyright__ = "Copyright 2015, TF Library Project"
 __credits__ = []
 __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
+# __all__ = []
 
 db = tf_debug.Debug(1,1,0)
 
@@ -64,7 +65,7 @@ M_Ar = 39.948           # Atomic mass of atomic/molecular Argon [amu]
 
 
 ## Functions
-def poly1(x, coefs, str_eqn = False):
+def poly(x, coefs, str_eqn = False):
     """ Polynomial function of order len(args)-1
     Return: arg1 + arg2 x + arg3 x^2 + arg4 x^3 + ..."""
 
@@ -95,12 +96,12 @@ def poly1(x, coefs, str_eqn = False):
     else:
         return sum, str_eqn
 
-def exp1(x, a, m, c, str_eqn=False):
+def exp(x, a, m, c, str_eqn=False):
     """ y = a * e^( m ) + c where exp, a and c can all be polynomials in x """
 
-    val_a, str_a = poly1(x, a, str_eqn=True)
-    val_m, str_m = poly1(x, m, str_eqn=True)
-    val_c, str_c = poly1(x, c, str_eqn=True)
+    val_a, str_a = poly(x, a, str_eqn=True)
+    val_m, str_m = poly(x, m, str_eqn=True)
+    val_c, str_c = poly(x, c, str_eqn=True)
     val = val_a * np.exp(val_m) + val_c
 
     if not str_eqn:
@@ -114,10 +115,10 @@ def exp1(x, a, m, c, str_eqn=False):
 
         return val, str_eqn
 
-def gauss1(x, A, mu, sigma, str_eqn=False):
+def gauss(x, A, mu, sigma, str_eqn=False):
     """ Gaussian distribution with centre mu and width sigma """
     ## @todo: update gaussian formula
-    return exp1(x, A, (1/(2*sigma),0,-mu/(2*sigma)), 0, str_eqn=str_eqn)
+    return exp(x, A, (1/(2*sigma),0,-mu/(2*sigma)), 0, str_eqn=str_eqn)
 
 if __name__ == "__main__":
     print("e = ", e)

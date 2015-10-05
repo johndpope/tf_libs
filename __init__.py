@@ -19,7 +19,11 @@ from .tf_numeric import *
 from .tf_plot import *
 from .tf_string import *
 from .tf_classes import *
+from .tf_simple import *
 
-
-# from .ext import savitzky_golay  ## Not written by TF: Scipy cookbook
+## from .ext import savitzky_golay  ## Not written by TF: Scipy cookbook
 from .ext.savitzky_golay import * ## Not written by TF: Scipy cookbook
+
+## Remove numpy and matplotlib etc from the namespace
+del np, plt, sys, os, shutil, re
+

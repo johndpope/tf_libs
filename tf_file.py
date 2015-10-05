@@ -18,7 +18,6 @@ Info:
     @since: 17-06-14
 """
 
-
 import numpy as np
 from pprint import pprint   # Pretty printing
 import os
@@ -28,6 +27,7 @@ import re
 ## CAN import:    tf_debug, tf_array
 ## CANNOT import: tf_class
 # from . import tf_numeric
+import tf_libs.tf_simple as tf_simple
 import tf_libs.tf_string as tf_string
 from tf_libs.tf_string import comb_str
 
@@ -142,7 +142,7 @@ def ncol(fn_list, cols, dir='', filekey=False, np_arrays = False, header_len = 0
 			values = line.split()#.strip()
 
 			for i, val in enumerate(values): # Convert numeric values to floats
-				values[i] = float(val) if tf_numeric.is_number(val) else val
+				values[i] = float(val) if tf_simple.is_number(val) else val
 			
 			try:
 				for col_no, name in cols.items(): 

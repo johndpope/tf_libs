@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl                  # For transforms etc ?
 from matplotlib import transforms   # For transforms etc
 
-# from . import tf_numeric
+import tf_libs.tf_debug as tf_debug
 import tf_libs.tf_array  as tf_array
 import tf_libs.tf_simple as tf_simple
 import tf_libs.tf_string as tf_string
@@ -33,6 +33,8 @@ __credits__ = []
 __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
+
+db = tf_debug.Debug(1,1,0)
 
 def set_mpl_defaults(defaults=0):
 	""" Sets defaults for future mpl plots this session
@@ -140,12 +142,11 @@ def extend_range(lims, pad=[5,5], absolute=False, pass_zero = False):
 	lims_max = max(lims)
 	range = lims_max - lims_min
 
-	if pass_zero:
+	## Stop extended range passing zero (the origin)
+	if (not pass_zero) and (lims_min-pad[0]*range)*lims_min < 0: # if extension of min changes sign of min stop at 0
+		lims_min = 0
+	else: # extend range as usual
 		lims_min = lims_min - pad[0]*range
-	else:
-		## Stop extended range passing xzero (the origin)
-		if (lims_min-pad[0]*range)*lims_min < 0: 	# if extension of min changes sign of min stop at 0
-			lims_min = 0
 
 	lims_max = lims_max + pad[1]*range
 
@@ -158,15 +159,26 @@ def axis_range(ax, padx = [5,5], pady = [5,5], **kwargs):
 	"""
 
 	## ********* Rather than axis limits need to get axis DATA limits incase new data plotted! *************************
+
+	db(xlim= ax.get_xlim(), ylim=ax.get_ylim())
+
+	## Update the axis view limits to first match the data limits
+	ax.autoscale(enable=True, axis=u'both', tight=True)
+	# ax.relim(visible_only=False) # matplotlib.axes.Axes.relim() prior to calling autoscale_view.
+	# ax.autoscale_view(tight=None, scalex=True, scaley=True)
+
 	x_range = ax.get_xlim()
 	y_range = ax.get_ylim()
 
-	ax.set_autoscalex_on(False)
-	ax.set_autoscaley_on(False)
+	db(y_range=y_range)
+
+	# ax.set_autoscalex_on(False)
+	# ax.set_autoscaley_on(False)
 
 	ax.set_xlim(extend_range(x_range, pad = padx, **kwargs))
 	ax.set_ylim(extend_range(y_range, pad = pady, **kwargs))
 
+	return
 
 def legend_dflt(ax, handles=None, labels=None, **kwargs):
 	""" Add a legend to an axis with nice default behaviour	"""

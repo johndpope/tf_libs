@@ -31,7 +31,7 @@ __status__ = "Development"
 __version__ = "1.0.1"
 
 
-class Debug: # Make upper case!
+class Debug:
     """ Debugging features """
     debug_ON_class = False
     plot_ON_class = False

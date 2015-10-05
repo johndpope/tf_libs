@@ -46,7 +46,7 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
-db = tf_debug.Debug(1,0,0)
+db = tf_debug.Debug(1,1,0)
 
 class PhysQuant(object):
     def __init__(self, name, symbol, unit):
@@ -64,8 +64,7 @@ class ParamFloat(np.ndarray):
         obj = np.asarray(input_array).view(cls)
         # add the new attribute to the created instance
         # obj.info = info
-        
-        
+
         if type(phys_quant) == str:
             obj.phys_quant = obj.get_dflt_phys_quant(phys_quant)
             obj.name = obj.phys_quant.name
@@ -79,13 +78,12 @@ class ParamFloat(np.ndarray):
         else:
             assert (type(phys_quant) == str) or (len(phys_quant) == 3), 'Incorrect type/format for phys_quant'
 
+        ## All atributes added here must also be added in array_finalise
+        obj.values = input_array
         obj.error = error
         obj.fn    = fn
         obj.description = description
-        
-        
-        
-        
+
         # Finally, we must return the newly created object:
         return obj
 
@@ -109,11 +107,12 @@ class ParamFloat(np.ndarray):
         #    type(obj) is InfoArray
         #
         # Note that it is here, rather than in the __new__ method,
-        # that we set the default value for 'info', because this
+        # that we set the default values for atributes, because this
         # method sees all creation of default objects - with the
         # InfoArray.__new__ constructor, but also with
         # arr.view(InfoArray).
         self.phys_quant = getattr(obj, 'phys_quant', 'arb')  # Default if not found is 3rd argument
+        self.values = getattr(obj, 'values', None)  # Default if not found is 3rd argument
         self.error = getattr(obj, 'error', None)  # Default if not found is 3rd argument
         self.fn = getattr(obj, 'fn', None)  # Default if not found is 3rd argument
         self.description = getattr(obj, 'description', None)  # Default if not found is 3rd argument
@@ -414,15 +413,16 @@ class PlotLines(Plot):
 
     def plot2D(self, x, y, block=True):
         """ Plot the y parameters (stored in a tuple) vs the x parameter """
+        db(_internal=self._internal)
         if not self._internal: # If called individually, redraw the plot as was
             if self.shown: self.draw() # If the plot has already been shown and closed, redraw it
             self.block = block
-        y = tf_simple.make_iter(y)
+        y = tf_simple.make_lt(y)
+
         for l in y: # Loop over y parameters and plot a line for each (a single y param is nested in a tuple)
-            line = self.ax.plot(self.x, l, label=l.legend())
+            line = self.ax.plot(x[:], l[:], label=l.legend())
             self.lines.append(line)
         if not self._internal:
-            pass
             self.update_colours(cm=self.cm) # Is this needed here?
             self.add_legend() # Update legend with new lines when called individually
             self.update_ranges(padx=self.padx, pady = self.pady, pass_zero=self.pass_zero)

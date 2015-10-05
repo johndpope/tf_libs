@@ -14,6 +14,10 @@ Info:
     @since: 18/09/2015
 """
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+
 ## CAN import: tf_debug
 ## CANNOT import: tf_array, tf_string
 
@@ -24,19 +28,7 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
-def is_number(s):
-    """
-    TODO: Test on numbers and strings and arrays
-    """
-    try:
-        n=str(float(s))
-        if n == "nan" or n=="inf" or n=="-inf" : return False
-    except ValueError:
-        try:
-            complex(s) # for complex
-        except ValueError:
-            return False
-    return True
+
 
 def range_of(list):
     """ Return the numerical range of a numeric list
@@ -60,7 +52,6 @@ def frac_range(list, frac):
     """
     return min(list) + (max(list) - min(list)) * frac 
 
-import numpy
 
 def smooth(x,window_len=11,window='hanning'):
     """smooth the data using a window with requested size.
@@ -111,52 +102,51 @@ def smooth(x,window_len=11,window='hanning'):
         raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
 
-    s=numpy.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
+    s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
     #print(len(s))
     if window == 'flat': #moving average
-        w=numpy.ones(window_len,'d')
+        w=np.ones(window_len,'d')
     else:
-        w=eval('numpy.'+window+'(window_len)')
+        w=eval('np.'+window+'(window_len)')
 
-    y=numpy.convolve(w/w.sum(),s,mode='valid')
+    y=np.convolve(w/w.sum(),s,mode='valid')
     return y
 
 
-from numpy import *
-from pylab import *
+
 def smooth_demo():
 
-    t=linspace(-4,4,100)
-    x=sin(t)
-    xn=x+randn(len(t))*0.1
+    t=np.linspace(-4,4,100)
+    x=np.sin(t)
+    xn=x+np.randn(len(t))*0.1
     y=smooth(x)
 
     ws=31
 
-    subplot(211)
-    plot(ones(ws))
+    plt.subplot(211)
+    plt.plot(np.ones(ws))
 
     windows=['flat', 'hanning', 'hamming', 'bartlett', 'blackman']
 
-    hold(True)
+    plt.hold(True)
     for w in windows[1:]:
         eval('plot('+w+'(ws) )')
 
-    axis([0,30,0,1.1])
+    plt.axis([0,30,0,1.1])
 
-    legend(windows)
-    title("The smoothing windows")
-    subplot(212)
-    plot(x)
-    plot(xn)
+    plt.legend(windows)
+    plt.title("The smoothing windows")
+    plt.subplot(212)
+    plt.plot(x)
+    plt.plot(xn)
     for w in windows:
-        plot(smooth(xn,10,w))
+        plt.plot(smooth(xn,10,w))
     l=['original signal', 'signal with noise']
     l.extend(windows)
 
-    legend(l)
-    title("Smoothing a noisy signal")
-    show()
+    plt.legend(l)
+    plt.title("Smoothing a noisy signal")
+    plt.show()
 
 
 if __name__=='__main__':
