@@ -392,9 +392,10 @@ class Plot(object): # Inherit plt.figure ?
                 self.save_fig(create_dir=True, dpi=300)
 
 class PlotLines(Plot):
+    """ Wrapper for matplotlib 2D line plots with handy default behaviour """
 
-
-    def __init__(self, cm = 'jet', padx = [0, 0], pady = [0, 0], pass_zero=False, force_legend=False, **kwargs):
+    def __init__(self, cm = 'jet', padx = [0, 0], pady = [0, 0], pass_zero=(False, False), force_legend=False,
+                 **kwargs):
 
         self.lines = [] # List of all lines plotted
 
@@ -429,6 +430,9 @@ class PlotLines(Plot):
             db('updated colours, legend and ranges')
         db(internal=self._internal)
         self.show()
+
+        db(a=1,b=2,c=3)
+
 
     def refresh_lines(self):
         """ Redraw existing lines stored in self.lines, without appending any new elements

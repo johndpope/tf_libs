@@ -17,7 +17,7 @@ Info:
 
 import numpy as np
 import matplotlib.pyplot as plt     # Plotting library
-import pylab
+from pprint import pprint  # Pretty printing
 import os
 import shutil
 import inspect              # Line numbers etc
@@ -69,9 +69,7 @@ class Debug:
         if not plot: # Normal Debug print opperation
             # debug_print(1, debug_ON=self.debug_ON)
             if self.debug_ON or force or Debug.debug_ON_class:
-                if self.lines_ON or force:
-                    print(module_name(level=1)+', '+line_no(level=1)+': ', end=' ')
-                debug_print(self.debug_ON, *args, **kwargs)
+                debug_print(self.debug_ON, lines_on=(self.lines_ON or force), *args, **kwargs)
                 Debug.ndebug_ON += 1
                 Debug.lines[self.line] = True
             else:
@@ -107,8 +105,6 @@ class Debug:
             Debug.debug_ON_class = True
         else:
             Debug.debug_ON_class = False
-
-
 
     def info(self):
         print("line {}: {} <Debug> ON, {} <Debug>: OFF".format(self.line, Debug.ndebug_ON, Debug.nOFF))
@@ -163,6 +159,11 @@ def whereami(level=0):
     string = line_no(level=level+1)+', '+func_name(level=level+1)+', '+module_name(level=level+1)+':\t'
     return string
 
+def file_line(level=1):
+    """ Return string containing filename and line number at level """
+    return module_name(level=level+1)+', '+line_no(level=level+1)+': '
+
+
 def traceback(level=0):
     """ Return string listing the full fraceback at the level relative to where this function was called """
     string = 'Traceback:\n'
@@ -194,16 +195,34 @@ def debug_print( debug, *args, **kwargs ):
      debug_print(Debug, var1 = var1, var2 = var2, var3 = var3)
     """
     ## TODO: Use pprint.pformat
+
+    lines_on = kwargs.pop('lines_on', False)
+
+    ## If lines_on prefix printed info with file name and line number
+    if lines_on:
+        prefix = file_line(level=2)
+        print(prefix, end='')
+    else: prefix = ''
+
     if debug:
         if args: # If there is anything in args
             for i, arg in enumerate(args):
-                if i != len(args)-1:    print(' '+str(arg)+',\t', end=' ')
-                else:                   print(arg)     
+                if i != len(args)-1:
+                    ## print arguements on one line separated by commas (,)
+                    print(' '+str(arg)+',\t', end=' ')
+                else:
+                    ## print final arguement with new line
+                    print(arg)
         if kwargs: # If there is anything in args
+            i = 0
             for key, value in kwargs.items():
-                ## If the variable is a list that wdebug_ON't fit debug_ON debug_ONe line
-                ##  start it debug_ON a new line
+                ## If the variable is a list that won't fit on one line start it on a new line
                 ## NOTE: does not check for numpy arrays
+
+                if i>0:
+                    print(end=' '*len(prefix))
+                i += 1
+
                 if (type(value) is list) and (len(value) > 6):
                     print('{} \t=\n{}'.format( key, value ))
                 else:
@@ -242,7 +261,7 @@ def plineno(text=False):
     """Return the current line number in the calling program.
     TODO: Fix problem with inspect.currentframe().f_back.f_back returning None
     """
-    # line = inspect.currentframe().f_back.f_back.f_lineno
+    line = inspect.currentframe().f_back.f_back.f_lineno
     if text:
         print('(line: {}) {}'.format(line, text))
     return line

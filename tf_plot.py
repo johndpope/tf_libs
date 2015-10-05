@@ -152,51 +152,61 @@ def extend_range(lims, pad=[5,5], absolute=False, pass_zero = False):
 
 	return np.array([lims_min, lims_max])
 
-def axis_range(ax, padx = [5,5], pady = [5,5], **kwargs):
-	""" Extend axis ranges by given percentages
-	Default to extend x and y ranges by 5%
-	Set pass_zero = True, to allow range to cross origin
-	"""
+def axis_range(ax, padx = [5,5], pady = [5,5], pass_zero = (False,False), **kwargs):
+    """ Extend axis ranges by given percentages
+    Default to extend x and y ranges by 5%
+    Set pass_zero = True, to allow range to cross origin
+    """
 
-	## ********* Rather than axis limits need to get axis DATA limits incase new data plotted! *************************
+    if tf_simple.is_scalar(pass_zero):
+        pass_zero = (pass_zero, pass_zero)
 
-	db(xlim= ax.get_xlim(), ylim=ax.get_ylim())
+    ## Update the axis view limits to first match the data limits
+    ax.autoscale(enable=True, axis=u'both', tight=True)
+    # ax.relim(visible_only=False) # matplotlib.axes.Axes.relim() prior to calling autoscale_view.
+    # ax.autoscale_view(tight=None, scalex=True, scaley=True)
 
-	## Update the axis view limits to first match the data limits
-	ax.autoscale(enable=True, axis=u'both', tight=True)
-	# ax.relim(visible_only=False) # matplotlib.axes.Axes.relim() prior to calling autoscale_view.
-	# ax.autoscale_view(tight=None, scalex=True, scaley=True)
+    ## Get the axis limits
+    x_range = ax.get_xlim()
+    y_range = ax.get_ylim()
 
-	x_range = ax.get_xlim()
-	y_range = ax.get_ylim()
+    # ax.set_autoscalex_on(False)
+    # ax.set_autoscaley_on(False)
 
-	db(y_range=y_range)
+    ## Extend the axis ranges by required amounts
+    ax.set_xlim(extend_range(x_range, pad = padx, pass_zero = pass_zero[0], **kwargs))
+    ax.set_ylim(extend_range(y_range, pad = pady, pass_zero = pass_zero[1], **kwargs))
 
-	# ax.set_autoscalex_on(False)
-	# ax.set_autoscaley_on(False)
-
-	ax.set_xlim(extend_range(x_range, pad = padx, **kwargs))
-	ax.set_ylim(extend_range(y_range, pad = pady, **kwargs))
-
-	return
+    return
 
 def legend_dflt(ax, handles=None, labels=None, **kwargs):
-	""" Add a legend to an axis with nice default behaviour	"""
-	options = { 'loc' : 'best',
-				'ncol' : 1,
-				'title' : None,
-				'framealpha' : 0.5,
-				'fontsize' : 18,
-				'fancybox' : True }
+    """ Add a legend to an axis with nice default behaviour	"""
 
-	options.update(kwargs)
-	if handles and labels:
-		legend = ax.legend(handles, labels, **kwargs)
-	else:
-		legend = ax.legend(**options)
+    no_lines = len(ax.lines) # number of currently plotted lines associated with this legend
 
-	legend.draggable(state=True)
-	return legend
+    ## If sufficiently many lines plotted, decrease the legend font size
+    mod_fontsize = (no_lines>5) * (no_lines-4)
+
+    options = { 'loc' : 'best',
+                'ncol' : 1,
+                'title' : None,
+                'framealpha' : 0.5,
+                'fontsize' : 18 - mod_fontsize,
+                'fancybox' : True }
+
+    ## update the default values if any of these kwargs have been passed
+    options.update(kwargs)
+
+    ## If separate handles and labels supplied, use them
+    if handles and labels:
+        legend = ax.legend(handles, labels, **kwargs)
+    else:
+        legend = ax.legend(**options)
+    legend.draggable(state=True)
+
+
+
+    return legend
 
 def update_colors(ax, cm = 'jet', update_legend=True, min_lines=6):
 	""" Update colour of existing lines to span colour table range
