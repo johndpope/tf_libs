@@ -10,7 +10,7 @@ import shutil
 import inspect              # Line numbers etc
 import sys
 
-class debug:
+class Debug:
     """ Debugging features """
     debug_ON = True # List of all files read so far (in order)
     plot_ON = True
@@ -23,41 +23,41 @@ class debug:
 
     def __init__(self, debug_ON=False, lines_ON = False, plot_ON=True):
         self.line = inspect.currentframe().f_back.f_lineno
-        ## Code first time debug class is initiated
-        if not debug.init:
-            # print whereami(level=1)+'tf_libs <debug> instance created'#.format(self.line)
-            debug.init = True
+        ## Code first time Debug class is initiated
+        if not Debug.init:
+            # print whereami(level=1)+'tf_libs <Debug> instance created'#.format(self.line)
+            Debug.init = True
         if debug_ON:
-            debug.debug_ON = True
+            Debug.debug_ON = True
         if lines_ON:
-            debug.lines_ON = True
+            Debug.lines_ON = True
         if plot_ON:
-            debug.plot_ON = True
+            Debug.plot_ON = True
 
     def __call__(self, *args, **kwargs):
         plot = kwargs.pop('plot', False)
         self.line = inspect.currentframe().f_back.f_lineno
 
-        if not plot: # Normal debug print opperation
-            if debug.debug_ON:
-                if debug.lines_ON:
+        if not plot: # Normal Debug print opperation
+            if Debug.debug_ON:
+                if Debug.lines_ON:
                     print module_name(level=1)+', '+line_no(level=1)+': ',
                 debug_print(1, *args, **kwargs)
-                debug.ndebug_ON += 1
-                debug.lines[self.line] = True
+                Debug.ndebug_ON += 1
+                Debug.lines[self.line] = True
             else: 
-                debug.nOFF += 1
-                debug.lines[self.line] = False
+                Debug.nOFF += 1
+                Debug.lines[self.line] = False
         else: # debug_plot
-            if debug.plot_ON:
+            if Debug.plot_ON:
                 debug_plot(*args, **kwargs) 
 
     def debug_ON(self):
-        debug.debug_ON = True
+        Debug.debug_ON = True
         print 'Debugging (tf_libs): \tdebug_ON'  
 
     def off(self):
-        debug.debug_ON = False
+        Debug.debug_ON = False
         print 'Debugging (tf_libs): \tOFF'
 
     def l(self):
@@ -65,15 +65,15 @@ class debug:
         print '(line: {}) {}'.format(line, text)
 
     def count(self):
-        print "line {}: {} <debug> debug_ON, {} debug OFF".format(self.line, debug.ndebug_ON, debug.nOFF)
+        print "line {}: {} <Debug> debug_ON, {} Debug OFF".format(self.line, Debug.ndebug_ON, Debug.nOFF)
 
     def info(self):
-        print "line {}: {} <debug> debug_ON, {} <debug>: OFF".format(self.line, debug.ndebug_ON, debug.nOFF)
+        print "line {}: {} <Debug> debug_ON, {} <Debug>: OFF".format(self.line, Debug.ndebug_ON, Debug.nOFF)
         for line, debug_ON in self.lines.iteritems():
             print ' ', line, debug_ON, ((debug_ON and ' <--') or '')
         
 def get_verbose_prefix():
-    """Returns an informative prefix for verbose debug output messages"""
+    """Returns an informative prefix for verbose Debug output messages"""
     s = inspect.stack()
     module_name = inspect.getmodulename(s[1][1])
     func_name = s[1][3]
@@ -117,7 +117,7 @@ def whereami(level=0):
     string = line_no(level=level+1)+', '+func_name(level=level+1)+', '+module_name(level=level+1)+':\t'
     return string
 
-def debug_print( debug, *args, **kwargs ):
+def debug_print( Debug, *args, **kwargs ):
     """
     Purpose:
       Functidebug_ON to print informatidebug_ON about variables that can be easily
@@ -128,7 +128,7 @@ def debug_print( debug, *args, **kwargs ):
      aldebug_ONgside the keyword names.
     
     Inputs:
-     debug      bool	toggle debug mode debug_ON and off
+     Debug      bool	toggle Debug mode debug_ON and off
      *args      any     variables to print
      **kwargs   any     variables to print with names
      
@@ -137,10 +137,10 @@ def debug_print( debug, *args, **kwargs ):
 
     Call examples: 
      debug_print(1, var1, var2, var3)
-     debug_print(debug, var1 = var1, var2 = var2, var3 = var3)
+     debug_print(Debug, var1 = var1, var2 = var2, var3 = var3)
     """
     ## TODO: Use pprint.pformat
-    if debug:
+    if Debug:
         if args: # If there is anything in args
             for i, arg in enumerate(args):
                 if i != len(args)-1:    print ' '+str(arg)+',\t',
@@ -161,7 +161,7 @@ def debug_plot(*args, **kwargs):
     xlabel = kwargs.pop('xlabel', 'x')
     ylabel = kwargs.pop('ylabel', 'y')
 
-    # print 'debug plot on line {}'.format(line_no(level))
+    # print 'Debug plot on line {}'.format(line_no(level))
 
     if len(args) == 1: # and len(kwargs) == 0:
         x = np.arange(len(args[0]))
@@ -193,7 +193,7 @@ def plineno(text=False):
 
 def debug_demo():
     print '*** tf_debug.py demo ***'
-    db = debug(1,1,1)
+    db = Debug(1,1,1)
 
     x = np.linspace(0,10,100)
     y = np.linspace(10,30,100)

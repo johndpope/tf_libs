@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 """ tf_array.py: Frequently used array operations and wrappers.
 

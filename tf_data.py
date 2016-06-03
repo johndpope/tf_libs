@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 """ tmp.py: Frequently used data processing operations and wrappers.
 
@@ -19,7 +21,7 @@ import matplotlib.pyplot as plt     # Plotting library
 
 # from scipy.optimize import curve_fit                # Curve fitting
 from scipy.signal import find_peaks_cwt, argrelmax  # Peak finding
-#from scipy.signal import savgol_filter              # Smoothing
+# from scipy.signal import savgol_filter              # Smoothing
 from scipy.interpolate import interp1d              # Interpolation
 
 from pprint import pprint   # Pretty printing
@@ -28,7 +30,7 @@ from pprint import pprint   # Pretty printing
 ## CANNOT import: tf_class
 # from tf_libs.tf_debug import debug_print as dprint
 
-from . import tf_debug
+import tf_debug
 db = tf_debug.Debug(0,1,1)
 
 __author__ = 'Tom Farley'
@@ -397,6 +399,10 @@ if __name__ == "__main__":
     plt.legend(loc='best')
     plt.grid(True)
     plt.show
+
+    x = np.arange(30)
+    s = smooth(x, window_len=5)
+    print('lenx:', len(x), len(s))
 
     pass
 
