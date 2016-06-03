@@ -28,7 +28,7 @@ import tf_libs as tf
 
 from tf_libs.tf_debug import debug_print as dprint
 
-from tf_libs.tf_debug import Debug as tfdebug
+from tf_libs.tf_debug import debug as tfdebug
 db = tfdebug(1,1)
 
 debug = 0

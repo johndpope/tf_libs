@@ -1,4 +1,4 @@
-import tf_debug as Debug
+import tf_debug as debug
 import tf_numeric as num
 import tf_file as file
 import tf_dir as dir

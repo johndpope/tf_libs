@@ -29,7 +29,7 @@ import re  # Regular expressions
 from pprint import pprint  # Pretty printing
 
 
-from tf_debug import Debug as tfdebug
+from tf_debug import debug as tfdebug
 from tf_debug import demo_print
 
 __author__ = 'Tom Farley'
