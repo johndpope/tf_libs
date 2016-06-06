@@ -274,11 +274,11 @@ def demo_print(command, info=""):
     if info:
         info = ' - '+info
         print('\n'+command+info)
-        print(exec(command))
+        # print(exec(command))
     else:
         print('\n'+command+' = ', end='')
-        print(exec(command))
-    return exec(command)
+        # print(exec(command))
+    # return exec(command)
 
 def debug_demo():
     print('*** tf_debug.py demo ***')

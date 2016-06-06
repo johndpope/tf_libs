@@ -30,7 +30,8 @@ from pprint import pprint   # Pretty printing
 ## CANNOT import: tf_class
 # from tf_libs.tf_debug import debug_print as dprint
 
-import tf_debug
+import tf_libs.tf_debug as tf_debug
+
 db = tf_debug.Debug(0,1,1)
 
 __author__ = 'Tom Farley'
@@ -118,17 +119,19 @@ def conv_diff(y_data, width=51, order=1):
     # else:
     #     raise RuntimeError('conv_diff got unexpected order arguement value')
 
-    y1 = gauss1
-
-    y_conv = np.r_[y_data[width-1:0:-1],y_data,y_data[-1:-width:-1]] # mirror data at edges
-    y_conv = np.convolve(y_conv, y1, mode="same")
-    y_conv = y_conv[(width-1):-(width-1)] # "-(width-1)" is slight bodge to get right number of elements
-    y_conv /= np.amax(np.absolute(y_conv)) # normalise output (not rigourus!)
-    
     if order>0:
+        y1 = gauss1
+
+        y_conv = np.r_[y_data[width-1:0:-1],y_data,y_data[-1:-width:-1]] # mirror data at edges
+        y_conv = np.convolve(y_conv, y1, mode="same")
+        y_conv = y_conv[(width-1):-(width-1)] # "-(width-1)" is slight bodge to get right number of elements
+        y_conv /= np.amax(np.absolute(y_conv)) # normalise output (not rigourus!)
+
         y_conv = conv_diff(y_conv, width=width, order=order-1)
-    
-    return y_conv
+
+        return y_conv
+    else: return y_data
+
 
 def find_linear(x_data, y_data, width=51, gap_length=3, data_length=10, 
                 tol_type='rel_peak', tol=0.6, plot=False, fig_name=False):
@@ -218,31 +221,35 @@ def find_linear(x_data, y_data, width=51, gap_length=3, data_length=10,
     
     return xlinear, ylinear
 
-def data_split(x, y, gap_length=3, data_length=10, test=True):
+def data_split(x, y, gap_length=3, data_length=10, verbose=True):
     "Split data at gaps"
+    i = np.arange(len(x))
     ## Find the average distace between the x data
     diff = np.diff(x)               # differences between adjacent data
     av_gap = np.average(diff)       # average separation
     ## Get indices of begining of gaps sufficiently greater than the average
     igap = np.nonzero(diff>gap_length*av_gap)[0] # nonzero nested in tuple
     
-    if test: print('data_split: {} gap(s) identified: {}'.format(len(igap), igap))
+    if verbose: print('data_split: {} gap(s) identified: {}'.format(len(igap), igap))
 
     xsplit = []
     ysplit = []
+    isplit_all = []
     ## No gap => 1 linear section, 1 gap => 2 linear sections, 2 pags => 3 linear sections etc.
     ## If no gaps, don't split the data
     if len(igap) == 0:
         xsplit.append(x)
         ysplit.append(y)
+        isplit_all.append(i)
     else:
         ## First set of linear data before first gap
         if igap[0]-0 >= data_length: # Only add data if set is long enough
             isplit = np.arange(0, igap[0]) # begining of data to begining of gap
             xsplit.append(x[isplit])
             ysplit.append(y[isplit])
+            isplit_all.append(isplit)
         else: 
-            if test: print('data_split: First set exluded as too short')
+            if verbose: print('data_split: First set exluded as too short')
 
         ## Deal with linear data that isn't bordered by the ends of the set
         for i in np.arange(1,len(igap)): # if start=stop, loop over empty array -> do nothing when len(ifap)=1
@@ -251,77 +258,79 @@ def data_split(x, y, gap_length=3, data_length=10, test=True):
                 isplit = np.arange(igap[i-1]+1, igap[i]) # end of last gap begining of next gap
                 xsplit.append(x[isplit])
                 ysplit.append(y[isplit])
+                isplit_all.append(isplit)
             else: 
-                if test: print('data_split: Set {} exluded as too short'.format(i))
+                if verbose: print('data_split: Set {} exluded as too short'.format(i))
 
         ## Last set of linear data after last gap
         if (len(x)-1)-igap[-1]+1 >= data_length: # Only add data if set is long enough
             isplit = np.arange(igap[-1]+1, len(x)-1) # end of last gap to end of data
             xsplit.append(x[isplit])
-            ysplit.append(y[isplit])        
+            ysplit.append(y[isplit])
+            isplit_all.append(isplit)
         else: 
-            if test: print('data_split: Last set exluded as too short')
+            if verbose: print('data_split: Last set exluded as too short')
 
-    return xsplit, ysplit
+    return isplit_all, xsplit, ysplit
 
-def smooth(x, window_len=11, window='hanning'):
+def smooth(x, window_len=10, window='hanning'):
     """smooth the data using a window with requested size.
-    
-    from: http://wiki.scipy.org/Cookbook/SignalSmooth
 
     This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal 
+    The signal is prepared by introducing reflected copies of the signal
     (with the window size) in both ends so that transient parts are minimized
     in the begining and end part of the output signal.
-    
+
     input:
-        x: the input signal 
-        window_len: the dimension of the smoothing window; should be an odd integer
+        x: the input signal
+        window_len: the dimension of the smoothing window
         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
             flat window will produce a moving average smoothing.
 
     output:
         the smoothed signal
-        
+
     example:
 
-    t=linspace(-2,2,0.1)
-    x=sin(t)+randn(len(t))*0.1
-    y=smooth(x)
-    
-    see also: 
-    
+    import numpy as np
+    t = np.linspace(-2,2,0.1)
+    x = np.sin(t)+np.random.randn(len(t))*0.1
+    y = smooth(x)
+
+    see also:
+
     numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
     scipy.signal.lfilter
- 
-    TODO: the window parameter could be the window itself if an array instead of a string
-    NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
-    """
 
+    TODO: the window parameter could be the window itself if an array instead of a string
+    """
+    # print('\n\nIn tf_data.smooth()\n\n')
     if x.ndim != 1:
         raise ValueError("smooth only accepts 1 dimension arrays.")
 
     if x.size < window_len:
         raise ValueError("Input vector needs to be bigger than window size.")
 
-
-    if window_len<3:
+    if window_len < 3:
         return x
-
 
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
         raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
-    ## Add reflected values to ends
-    s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
+    # s=np.r_[2*x[0]-x[window_len:1:-1], x, 2*x[-1]-x[-1:-window_len:-1]]  # original
+    s=np.r_[2*x[0]-x[window_len-1::-1], x, 2*x[-1]-x[-1:-(window_len+1):-1]]
     #print(len(s))
-    if window == 'flat': #moving average
-        w=np.ones(window_len,'d')
-    else:
-        w=eval('np.'+window+'(window_len)')
+    assert(len(s) == len(x) + 2*window_len)
 
-    y=np.convolve(w/w.sum(),s,mode='valid')
-    return y[(window_len/2-1):-(window_len/2)]
+    if window == 'flat': #moving average
+        w = np.ones(window_len,'d')
+    else:
+        w = getattr(np, window)(window_len)
+    y = np.convolve(w/w.sum(), s, mode='same')  # len(y) = len(s)-2 ?
+    # return y[window_len-1:-window_len+1]  # original
+    y = y[window_len:-window_len]
+    assert(len(y) == len(x))
+    return y
 
 def smooth2(x, window_len=11, polyorder=2, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0):
     y = savgol_filter(x, window_len=window_len, polyorder=polyorder, mode=mode, cval=cval)
@@ -383,22 +392,22 @@ def function(required_arg, *args, **kwargs):
 
 if __name__ == "__main__":
     print('*** tf_data.py demo ***')
-    x = linspace(0,10,1000)
-    y = np.sin(x)+x
+    x = np.linspace(0,1000,1000)
+    y = np.sin(np.deg2rad(x))#+x
     y = y/np.amax(np.absolute(y)) 
-    x = x / np.pi
+    x = x
     print("interp_val(x, y, 2.3649, kind='linear') = ", end=' ')
     print(interp_val(x, y, 2.3649, kind='linear'))
 
     fig = plt.figure('conv_diff test')
     fig.clear()
-    plt.plot( x, y, label = 'sin')
+    plt.plot( x, y, label = 'sin', c='k', lw=3)
     for n in range(4):
-        plt.plot( x, conv_diff(y, order=n), label = 'n={}'.format(n))
+        plt.plot(x, conv_diff(y, order=n), label='n={}'.format(n))
     plt.title('conv_diff test')
     plt.legend(loc='best')
     plt.grid(True)
-    plt.show
+    plt.show()
 
     x = np.arange(30)
     s = smooth(x, window_len=5)
