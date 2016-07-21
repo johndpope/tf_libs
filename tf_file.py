@@ -40,7 +40,7 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
-def mkdir(dirs, verbatim = False):
+def mkdir(dirs, verbatim=True, start_dir=None):
 	""" Checks if a directory exists and makes it if nessesary.
 	Inputs:
 		dir 			- Directory path
@@ -48,8 +48,22 @@ def mkdir(dirs, verbatim = False):
 						  False: print nothing, 
 						  0:     print only if dir was created
 	"""
+	if start_dir is not None:
+		start_dir = os.path.abspath(start_dir)
+		if not os.path.isdir(start_dir):
+			if verbatim:
+				print('Directories {} were not created as start directory {} does not exist.'.format(dirs, start_dir))
+			return
+	# Nest string in list for loop
+	if isinstance(dirs, str):
+		dirs = [dirs]
+
 	for dir in dirs:
 		if not os.path.isdir( dir ):
+			if not start_dir in os.path.abspath(dir):
+				if verbatim:
+					print('Directory {} was not created as does not start at {} .'.format(dirs, os.path.relpath(start_dir)))
+				continue
 			os.makedirs( dir )
 			if (verbatim == 0 or verbatim):
 				print('Created directory: '+dir)
