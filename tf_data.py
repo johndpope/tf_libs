@@ -302,12 +302,13 @@ def find_linear(x_data, y_data, width=51, gap_length=3, data_length=10,
     
     return xlinear, ylinear
 
-def data_split(x, y, gap_length=3, data_length=10, verbose=True):
-    "Split data at gaps"
+def data_split(x, y, gap_length=3, data_length=10, av_diff=False, return_longest=False, verbose=True):
+    """Split data at gaps where difference between data points in much greater than the average/modal difference
+    Return """
     i = np.arange(len(x))
     ## Find the average distace between the x data
     diff = np.diff(x)               # differences between adjacent data
-    av_gap = np.average(diff)       # average separation
+    av_gap = np.mode(diff) if not av_diff else np.average(diff)       # average/modal separation
     ## Get indices of begining of gaps sufficiently greater than the average
     igap = np.nonzero(diff>gap_length*av_gap)[0] # nonzero nested in tuple
     
@@ -352,7 +353,10 @@ def data_split(x, y, gap_length=3, data_length=10, verbose=True):
         else: 
             if verbose: print('data_split: Last set exluded as too short')
 
-    return isplit_all, xsplit, ysplit
+    # If return_longest is True, only return longest section of data without gaps, else return all data with gap removed
+    ind = np.array([len(x) for x in xsplit]).argmax() if return_longest else np.arange(len(xsplit))  
+
+    return isplit_all[ind], xsplit[ind], ysplit[ind]
 
 def smooth(x, window_len=10, window='hanning'):
     """smooth the data using a window with requested size.
