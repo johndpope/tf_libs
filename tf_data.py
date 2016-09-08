@@ -302,8 +302,8 @@ def find_linear(x_data, y_data, width=51, gap_length=3, data_length=10,
     
     return xlinear, ylinear
 
-def data_split(x, y, gap_length=3, data_length=10, av_diff=False, return_longest=False, verbose=True):
-    """Split data at gaps where difference between data points in much greater than the average/modal difference
+def data_split(x, y=None, gap_length=3, data_length=10, av_diff=False, return_longest=False, verbose=True):
+    """Split data at gaps where difference between x data points in much greater than the average/modal difference
     Return """
     i = np.arange(len(x))
     ## Find the average distace between the x data
@@ -315,20 +315,23 @@ def data_split(x, y, gap_length=3, data_length=10, av_diff=False, return_longest
     if verbose: print('data_split: {} gap(s) identified: {}'.format(len(igap), igap))
 
     xsplit = []
-    ysplit = []
+    if y is not None:
+        ysplit = []
     isplit_all = []
     ## No gap => 1 linear section, 1 gap => 2 linear sections, 2 pags => 3 linear sections etc.
     ## If no gaps, don't split the data
     if len(igap) == 0:
         xsplit.append(x)
-        ysplit.append(y)
+        if y is not None:
+            ysplit.append(y)
         isplit_all.append(i)
     else:
         ## First set of linear data before first gap
         if igap[0]-0 >= data_length: # Only add data if set is long enough
             isplit = np.arange(0, igap[0]) # begining of data to begining of gap
             xsplit.append(x[isplit])
-            ysplit.append(y[isplit])
+            if y is not None:
+                ysplit.append(y[isplit])
             isplit_all.append(isplit)
         else: 
             if verbose: print('data_split: First set exluded as too short')
@@ -339,7 +342,8 @@ def data_split(x, y, gap_length=3, data_length=10, av_diff=False, return_longest
             if igap[i]-igap[i-1]+1 >= data_length: # Only add data if set is long enough
                 isplit = np.arange(igap[i-1]+1, igap[i]) # end of last gap begining of next gap
                 xsplit.append(x[isplit])
-                ysplit.append(y[isplit])
+                if y is not None:
+                    ysplit.append(y[isplit])
                 isplit_all.append(isplit)
             else: 
                 if verbose: print('data_split: Set {} exluded as too short'.format(i))
@@ -348,15 +352,18 @@ def data_split(x, y, gap_length=3, data_length=10, av_diff=False, return_longest
         if (len(x)-1)-igap[-1]+1 >= data_length: # Only add data if set is long enough
             isplit = np.arange(igap[-1]+1, len(x)-1) # end of last gap to end of data
             xsplit.append(x[isplit])
-            ysplit.append(y[isplit])
+            if y is not None:
+                ysplit.append(y[isplit])
             isplit_all.append(isplit)
         else: 
             if verbose: print('data_split: Last set exluded as too short')
 
     # If return_longest is True, only return longest section of data without gaps, else return all data with gap removed
-    ind = np.array([len(x) for x in xsplit]).argmax() if return_longest else np.arange(len(xsplit))  
-
-    return isplit_all[ind], xsplit[ind], ysplit[ind]
+    ind = np.array([len(x) for x in xsplit]).argmax() if return_longest else np.arange(len(xsplit))
+    if y is not None:
+        return isplit_all[ind], xsplit[ind], ysplit[ind]
+    else:
+        return isplit_all[ind], xsplit[ind]
 
 def smooth(x, window_len=10, window='hanning'):
     """smooth the data using a window with requested size.
