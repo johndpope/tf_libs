@@ -41,6 +41,87 @@ __email__ = "farleytpm@gmail.com"
 __status__ = "Development"
 __version__ = "1.0.1"
 
+def _find_dist_extrema(arr, point, index=True, normalise=False, func=np.argmin):
+    """ Find closest point to supplied point in either 1d array, 2d grid or 2xn array of coordinate pairs
+    08-09-2016
+    """
+    inparr = np.array(arr)
+    # print('point', point)
+    # print('inparr.shape', inparr.shape)
+    # print('inparr', inparr)
+    shape = inparr.shape
+    if isinstance(point, numbers.Number) or len(inparr.shape) == 1:  # if point is a single number take array to be 1d
+        if index: return func(np.abs(inparr-point))
+        else: return inparr[func(np.abs(inparr-point))]
+    elif len(np.array(point).shape) == 1 and len(point) > 1:  # point is a 2D coordinate
+        # Make sure array in two column format
+        if shape[1] == 2 and shape[0] > 0:
+            inparr = inparr.T
+            shape = inparr.shape
+        ## 2D coordinates
+        if shape[0] == 2 and shape[1] > 0 and len(point) == 2:
+            (valx,valy) = point
+            normarr = deepcopy(inparr)
+            # Treat x and y coordinates as having the same fractional accuracy ie as if dx=dy
+            if normalise:
+                normarr[0] = (normarr[0]-np.min(normarr[0])) / (np.max(normarr[0]) - np.min(normarr[0]))
+                normarr[1] = (normarr[1]-np.min(normarr[1])) / (np.max(normarr[1]) - np.min(normarr[1]))
+                valx = (valx-np.min(inparr[0])) / (np.max(inparr[0]) - np.min(inparr[0]))
+                valy = (valy-np.min(inparr[1])) / (np.max(inparr[1]) - np.min(inparr[1]))
+            ixy = func((((normarr[0,:]-valx)**2.0 + (normarr[1,:] - valy)**2.0)**0.5))
+            if index:
+                return ixy
+            else:
+                return inparr[:, ixy]
+        ## 3D coordinates
+        elif len(shape) == 3 and len(point) == 3:
+            # incomplete!
+            (valx, valy, valz) = point
+            return func((((inparr[:,0]-valx)**2.0 + (inparr[:,1] - valy)**2.0 + (inparr[:,2] - valz)**2.0)**0.5))
+
+        else:
+            raise RuntimeError('findNearest: Input parameters did not match any anticipated format')
+    # Both imp array and point are sets of 2D coordinates
+    # Find points with shortest distance between them in the two point clouds
+    elif np.array(point).ndim == 2:
+        point = np.array(point)
+        # Make sure inparr and point arrays have shape (n, 2). If (2, n) transpose first
+        if point.shape[0] == 2 and point.shape[1] > 0:
+            point = point.T
+        if np.array(inparr).shape[0] == 2 and np.array(inparr).shape[1] > 0:
+            inparr = inparr.T
+
+        assert np.array(point).shape[1] == 2
+        point = np.array(point)
+
+        def distance2(p1, p2):
+            # return np.hypot(p2[0] - p1[0], p2[1] - p1[1])
+            return (p2[0] - p1[0])**2 + (p2[1] - p1[1])**2  # remove sqrt for speed up
+
+        # TODO: Consider incremental/bisection resolution increase when have only one local distance minima
+        # Get all combinations of points
+        points = np.array([tup for tup in itertools.product(inparr, point)])
+
+        arr0, point0 = points[func([distance2(Pa, Pb) for (Pa, Pb) in points])]
+        if index:
+            return [np.where(np.bitwise_and(inparr[:, 0] == arr0[0], inparr[:, 1] == arr0[1]))[0][0],
+                    np.where(np.bitwise_and(point[:, 0] == point0[0], point[:, 1] == point0[1]))[0][0]]
+        else:
+            return arr0, point0
+
+    else:
+            raise RuntimeError('findNearest: Input array did not match any anticipated format')
+
+def find_nearest(arr, point, index=True, normalise=False):
+    """ Find closest point to supplied point in either 1d array, 2d grid or 2xn array of coordinate pairs
+    """
+    return _find_dist_extrema(arr, point, index=index, normalise=normalise, func=np.argmin)
+
+def find_furthest(arr, point, index=True, normalise=False):
+    """ Find furthest point to supplied point in either 1d array, 2d grid or 2xn array of coordinate pairs
+    """
+    return _find_dist_extrema(arr, point, index=index, normalise=normalise, func=np.argmax)
+
 def interp_val(x, y, x0, kind='linear'):
     "Interpolated y value at x0 (scipy.interpolate.interp1d wrapper)"
     ## TODO: add numpy array check

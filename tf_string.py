@@ -545,8 +545,73 @@ def str_moment(arr, ax=None, xy=(0.04, 0.7)):
 
     return stats_str
 
+def str2tex(string):
+    """Convert common mathematical strings to latex friendly strings for plotting"""
+    def insert(string, char, i):
+        """ insert character after index """
+        if i == -1:  # effecively last character: -1-1
+            return string + char
+        # elif i == 0:  # effecively first character: 0-1
+        #     return char + string
+        else:
+            return string[0:i+1] + char + string[i+1:]
+
+    first = 1000
+    last = -1
+    close_chars = [' ', '=', '^', '_']
+
+    for char_enclose in ['_', '^']:
+        start = 0
+        while string.find(char_enclose, start+1, len(string)) != -1:
+            if string.find(char_enclose, start+1, len(string)) == string.find(char_enclose+'{', start+1, len(string)):
+                continue
+            start = string.find(char_enclose, start, len(string))
+            if start < first:
+                first = np.max(start-1, 0)
+            string = insert(string, '{', start)
+            found = False
+            end_chars = deepcopy(close_chars)
+            end_chars.remove(char_enclose)
+            for char in end_chars:
+                if string.find(char, start, len(string)) != -1:
+                    end = string.find(char, start, -1)
+                    if end > last:
+                        last = end -1
+                    string = insert(string, '}', end-1)
+                    found = True
+                    break
+            if found is False:
+                string += '}'
+                last = 1000
+
+    for char_escape in ['%', 'Psi', 'phi', 'theta', 'sigma']:
+        start = 0
+        while string.find(char_escape, start, len(string)) != -1:
+            if string.find(char_escape, start+1, len(string)) == string.find('\\'+char_escape, start+1, len(string))-1:
+                continue
+            start = string.find(char_escape, start, len(string))
+            if start < first:
+                first = np.max(start-1, 0)
+            string = insert(string, '\\', start-1)
+            start += 2
+            if start+len(char_escape) > last:
+                last = start+len(char_escape)
+
+    if first!= 1000:
+        first = string.rfind(' ', 0, first+1)
+        if first == -1:
+            first = 0
+        if last == 1000:
+            last = len(string)
+        string = insert(string, '$', first)
+        string = insert(string, '$', last)
+
+    string = re.sub('nounits', 'N/A', string)
+
+    return string
+
 def str_replace(string, pattern, replacement='', unique=True):
-    """ Find occurenceof pattern in string and replace with preplacement """
+    """ Find occurence of pattern in string and replace with replacement: UNFINISHED"""  # TODO: UNFINISHED
     pat = re.compile(pattern)
     m = pat.match(string)
     print(m.expand())
@@ -557,9 +622,9 @@ def str_replace(string, pattern, replacement='', unique=True):
     if len(m.groups()) > 1:
         print('Multiple (%d) matches for %s in %s' % (len(m.groups), pattern, string))
 
-    re.s
-
-    strn = m.group(1)
+    # re.s
+    #
+    # strn = m.group(1)
 
 
 def test_print():
